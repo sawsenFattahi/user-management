@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@le-modules/*": ["src/modules/*"],
+      "@le-common/*": ["src/common/*"],
+      "@le-decorators/*": ["src/common/decorators/*"],
+      "@le-guards/*": ["src/common/guards/*"],
+      "@le-auth/*": ["src/modules/auth/*"],
+      "@le-users/*": ["src/modules/users/*"],
+      "@le-roles/*": ["src/common/decorators/roles/*"],
+      "@le-swagger/*": ["src/swagger/*"],
+      "@le-strategies/*": ["src/common/strategies/*"],
+      "@le-config/*": ["src/config/*"],
+      "@le-repositories/*": ["src/infrastructure/database/repositories/*"],
+      "@le-entities/*": ["src/core/entities/*"],
+      "@le-schemas/*": ["src/infrastructure/database/schemas/*"]
+    },
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+  }
+}
