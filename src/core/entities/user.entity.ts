@@ -1,12 +1,14 @@
-import { Role } from '@le-common/enums/role.enum';
 import * as bcrypt from 'bcrypt';
+
+import type { ROLE } from '@lesechos/common/enums/role.enum';
 
 export class User {
   constructor(
     public id: string,
     public username: string,
     public password: string,
-    public role: Role,
+    public role: typeof ROLE,
+    public email?: string,
     public name?: string,
     public address?: Record<string, any>,
     public comment?: string

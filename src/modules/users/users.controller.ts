@@ -12,35 +12,33 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { Public } from '@le-common/decorators/public.decorator';
-import { Role } from '@le-common/enums/role.enum';
-import { DeleteUserUseCase } from '@le-core/use-cases/delete-user.use-case';
-import { UpdateUserUseCase } from '@le-core/use-cases/update-user.use-case';
-import { Roles } from '@le-decorators/roles.decorator';
-import { User } from '@le-entities/user.entity';
-import { JwtAuthGuard } from '@le-guards/jwt-auth.guard';
-import { RolesGuard } from '@le-guards/roles.guard';
-import { UserRepositoryAdapter } from '@le-repositories/user-repository.adapter';
-import { GetAllUsersUseCase } from '@le-use-cases/get-all-users.use-case';
-import { GetUserByIdUseCase } from '@le-use-cases/get-user-by-id.use-case';
-import { RegisterUserUseCase } from '@le-use-cases/register-user.use-case';
-import { CreateUserDto } from '@le-users/dto/create-user.dto';
-import { UpdateUserDto } from '@le-users/dto/update-user.dto';
+import { Public } from '@lesechos/common/decorators/public.decorator';
+import { Roles } from '@lesechos/common/decorators/roles.decorator';
+import { ROLE } from '@lesechos/common/enums/role.enum';
+import { JwtAuthGuard } from '@lesechos/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@lesechos/common/guards/roles.guard';
+import { DeleteUserUseCase } from '@lesechos/core/use-cases/delete-user.use-case';
+import { GetAllUsersUseCase } from '@lesechos/core/use-cases/get-all-users.use-case';
+import { GetUserByIdUseCase } from '@lesechos/core/use-cases/get-user-by-id.use-case';
+import { RegisterUserUseCase } from '@lesechos/core/use-cases/register-user.use-case';
+import { UpdateUserUseCase } from '@lesechos/core/use-cases/update-user.use-case';
+import { CreateUserDto } from '@lesechos/modules/users/dto/create-user.dto';
+import { UpdateUserDto } from '@lesechos/modules/users/dto/update-user.dto';
+
 import {
-  ApiFindAllUsersResponse,
-  ApiUpdateUserBody,
-  ApiUpdateUserResponse,
   ApiCreateUserBody,
   ApiCreateUserResponse,
-  ApiGetOneUserResponse,
   ApiDeleteUserResponse,
-} from '@le-users/swagger';
+  ApiFindAllUsersResponse,
+  ApiGetOneUserResponse,
+  ApiUpdateUserBody,
+  ApiUpdateUserResponse,
+} from './swagger';
 
 @ApiTags('Users') // Group under "Users" in Swagger
 @Controller('users')
 export class UsersController {
   constructor(
-    private readonly userRepository: UserRepositoryAdapter,
     private readonly registerUserUseCase: RegisterUserUseCase,
     private readonly getAllUsersUseCase: GetAllUsersUseCase,
     private readonly getUserByIdUseCase: GetUserByIdUseCase,
@@ -59,7 +57,7 @@ export class UsersController {
   @ApiCreateUserBody()
   @ApiCreateUserResponse()
   async create(@Body() createUserDto: CreateUserDto) {
-    return this.registerUserUseCase.execute(createUserDto as User);
+    return this.registerUserUseCase.execute(createUserDto);
   }
 
   /**
@@ -69,7 +67,7 @@ export class UsersController {
    * @param updates - Partial user details to update
    * @returns The updated user object
    */
-  @Roles(Role.User, Role.Admin)
+  @Roles(ROLE.USER, ROLE.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update current user information' })
@@ -86,14 +84,13 @@ export class UsersController {
    * @param uid - User ID
    * @returns The user object
    */
-  @Roles(Role.Admin)
+  @Roles(ROLE.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a user by UID' })
   @ApiGetOneUserResponse()
   @Get('admin/:id')
   async findOne(@Param('id') id: string) {
-    console.log('id from controller', id);
     return this.getUserByIdUseCase.execute(id);
   }
 
@@ -104,7 +101,7 @@ export class UsersController {
    * @param sort - JSON string for sorting
    * @returns List of users
    */
-  @Roles(Role.Admin)
+  @Roles(ROLE.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a list of all users' })
@@ -121,7 +118,7 @@ export class UsersController {
    * @param updateUserDto - Updated user details
    * @returns The updated user object
    */
-  @Roles(Role.Admin)
+  @Roles(ROLE.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a user by UID (Admin only)' })
@@ -138,7 +135,7 @@ export class UsersController {
    * @param id - User ID
    * @returns A confirmation message
    */
-  @Roles(Role.Admin)
+  @Roles(ROLE.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a user by ID (Admin only)' })

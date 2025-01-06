@@ -1,15 +1,15 @@
-import { Controller, Post, Body, UseGuards, Req, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { Public } from '@le-common/decorators/public.decorator';
-import { Roles } from '@le-common/decorators/roles.decorator';
-import { Role } from '@le-common/enums/role.enum';
-import { RolesGuard } from '@le-common/guards/roles.guard';
-import { LogoutUserUseCase } from '@le-core/use-cases/logout.use-case';
-import { JwtAuthGuard } from '@le-guards/jwt-auth.guard';
-import { ApiGetMeResponse } from '@le-modules/users/swagger/api.get.me.swagger';
-import { AuthenticateUserUseCase } from '@le-use-cases/authenticate-user.use-case';
-import { GetUserByIdUseCase } from '@le-use-cases/get-user-by-id.use-case';
+import { Public } from '@lesechos/common/decorators/public.decorator';
+import { Roles } from '@lesechos/common/decorators/roles.decorator';
+import { ROLE } from '@lesechos/common/enums/role.enum';
+import { JwtAuthGuard } from '@lesechos/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@lesechos/common/guards/roles.guard';
+import { AuthenticateUserUseCase } from '@lesechos/core/use-cases/authenticate-user.use-case';
+import { GetUserByIdUseCase } from '@lesechos/core/use-cases/get-user-by-id.use-case';
+import { LogoutUserUseCase } from '@lesechos/core/use-cases/logout.use-case';
+import { ApiGetMeResponse } from '@lesechos/modules/users/swagger/api.get.me.swagger';
 
 @ApiTags('Authentication') // Group under "Authentication" in Swagger
 @Controller('auth')
@@ -47,10 +47,10 @@ export class AuthController {
    * Accessible to both Admin and User roles.
    * @returns User details
    */
-  @Roles(Role.User, Role.Admin)
+  @Roles(ROLE.USER, ROLE.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get current user information' })
+  @ApiOperation({ summary: 'Get current USER information' })
   @ApiGetMeResponse()
   @Get('me')
   async getCurrentUser(@Req() req: any) {
@@ -62,7 +62,7 @@ export class AuthController {
    * @param req - Request containing user information
    * @returns Logout confirmation message
    */
-  @Roles(Role.User, Role.Admin)
+  @Roles(ROLE.USER, ROLE.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('logout')
   @ApiOperation({ summary: 'User logout' })

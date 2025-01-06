@@ -1,24 +1,6 @@
 {
   "compilerOptions": {
-    "paths": {
-      "@le-modules/*": ["src/modules/*"],
-      "@le-common/*": ["src/common/*"],
-      "@le-decorators/*": ["src/common/decorators/*"],
-      "@le-guards/*": ["src/common/guards/*"],
-      "@le-auth/*": ["src/modules/auth/*"],
-      "@le-users/*": ["src/modules/users/*"],
-      "@le-roles/*": ["src/common/decorators/roles/*"],
-      "@le-swagger/*": ["src/swagger/*"],
-      "@le-strategies/*": ["src/common/strategies/*"],
-      "@le-config/*": ["src/config/*"],
-      "@le-repositories/*": ["src/infrastructure/database/repositories/*"],
-      "@le-entities/*": ["src/core/entities/*"],
-      "@le-schemas/*": ["src/infrastructure/database/schemas/*"],
-      "@le-core/*": ["src/core/*"],
-      "@le-interfaces/*": ["src/core/interfaces/*"],
-      "@le-use-cases/*": ["src/core/use-cases/*"],
-      "@le-infrastructure/*": ["src/infrastructure/*"],
-      },
+    "paths": { "@lesechos/*": ["src/*"] },
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
@@ -36,6 +18,6 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false,
+    "noFallthroughCasesInSwitch": false
   }
 }

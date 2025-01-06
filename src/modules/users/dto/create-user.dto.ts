@@ -1,13 +1,14 @@
-import { Role } from '@le-common/enums/role.enum';
 import {
+  IsEmail,
   IsEnum,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
   MinLength,
-  IsObject,
-  IsEmail,
 } from 'class-validator';
+
+import { ROLE } from '@lesechos/common/enums/role.enum';
 
 /**
  * DTO for creating a user
@@ -42,19 +43,9 @@ export class CreateUserDto {
   @IsOptional()
   comment?: string;
 
-  @IsEnum(Role, {
-    message: 'Role must be either "admin" or "user".',
+  @IsEnum(ROLE, {
+    message: 'Role must be either "ADMIN" or "USER".',
   })
   @IsNotEmpty()
-  role: Role;
-}
-
-/**
- * DTO for creating a user with UID
- * Extends CreateUserDto by adding a UID field
- */
-export class CreateUserWithUidDto extends CreateUserDto {
-  @IsString()
-  @IsNotEmpty()
-  uid: string;
+  role: typeof ROLE;
 }

@@ -1,6 +1,6 @@
 import { Inject, NotFoundException } from '@nestjs/common';
 
-import { IUserRepository } from '@le-interfaces/user-repository.interface';
+import { IUserRepository } from '../interfaces/user-repository.interface';
 
 export class GetUserByIdUseCase {
   constructor(

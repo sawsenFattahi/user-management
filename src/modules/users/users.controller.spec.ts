@@ -1,18 +1,20 @@
-import { INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-
-import { User } from '@le-entities/user.entity';
-import { JwtAuthGuard } from '@le-guards/jwt-auth.guard';
-import { RolesGuard } from '@le-guards/roles.guard';
-import { UserRepositoryAdapter } from '@le-repositories/user-repository.adapter';
-import { DeleteUserUseCase } from '@le-use-cases/delete-user.use-case';
-import { GetAllUsersUseCase } from '@le-use-cases/get-all-users.use-case';
-import { GetUserByIdUseCase } from '@le-use-cases/get-user-by-id.use-case';
-import { RegisterUserUseCase } from '@le-use-cases/register-user.use-case';
-import { UpdateUserUseCase } from '@le-use-cases/update-user.use-case';
+import { Test } from '@nestjs/testing';
 import * as request from 'supertest';
 
+import { JwtAuthGuard } from '@lesechos/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@lesechos/common/guards/roles.guard';
+import { DeleteUserUseCase } from '@lesechos/core/use-cases/delete-user.use-case';
+import { GetAllUsersUseCase } from '@lesechos/core/use-cases/get-all-users.use-case';
+import { GetUserByIdUseCase } from '@lesechos/core/use-cases/get-user-by-id.use-case';
+import { RegisterUserUseCase } from '@lesechos/core/use-cases/register-user.use-case';
+import { UpdateUserUseCase } from '@lesechos/core/use-cases/update-user.use-case';
+import { UserRepositoryAdapter } from '@lesechos/infrastructure/database/repositories/user-repository.adapter';
+
 import { UsersController } from './users.controller';
+
+import type { User } from '@lesechos/core/entities/user.entity';
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('UsersController', () => {
   let app: INestApplication;
@@ -28,6 +30,17 @@ describe('UsersController', () => {
     update: jest.fn(),
     delete: jest.fn(),
   };
+  function createMockUser(overrides = {}): any {
+    return {
+      id: '123',
+      username: 'testuser',
+      role: 'user',
+      password: 'hashedPassword123',
+      hashPassword: jest.fn(),
+      validatePassword: jest.fn(),
+      ...overrides, // Allow overriding default properties
+    };
+  }
 
   beforeEach(async () => {
     mockRegisterUserUseCase = { execute: jest.fn() } as any;
@@ -63,39 +76,52 @@ describe('UsersController', () => {
 
   it('should create a new user', async () => {
     const createUserDto = { username: 'testuser', password: 'password123', role: 'user' };
-    const createdUser = { id: '123', ...createUserDto };
-    jest.spyOn(mockRegisterUserUseCase, 'execute').mockResolvedValue(createdUser as User);
+    const createdUser = createMockUser();
+    jest.spyOn(mockRegisterUserUseCase, 'execute').mockResolvedValue(createdUser);
 
     const response = await request(app.getHttpServer())
       .post('/users')
       .send(createUserDto)
       .expect(201);
 
-    expect(response.body).toEqual(createdUser);
+    expect(response.body).toEqual({
+      id: '123',
+      password: 'hashedPassword123',
+      role: 'user',
+      username: 'testuser',
+    });
     expect(mockRegisterUserUseCase.execute).toHaveBeenCalledWith(createUserDto);
   });
 
   it('should get a user by ID', async () => {
     const userId = '123';
-    const user = { id: userId, username: 'testuser' };
-    jest.spyOn(mockGetUserByIdUseCase, 'execute').mockResolvedValue(user as User);
+    const user = createMockUser({ id: userId });
+    jest.spyOn(mockGetUserByIdUseCase, 'execute').mockResolvedValue(user);
 
     const response = await request(app.getHttpServer()).get(`/users/admin/${userId}`).expect(200);
 
-    expect(response.body).toEqual(user);
+    expect(response.body).toEqual({
+      id: '123',
+      password: 'hashedPassword123',
+      role: 'user',
+      username: 'testuser',
+    });
     expect(mockGetUserByIdUseCase.execute).toHaveBeenCalledWith(userId);
   });
 
   it('should get all users', async () => {
     const users = [
-      { id: '1', username: 'user1' },
-      { id: '2', username: 'user2' },
+      createMockUser({ id: '1', username: 'user1' }),
+      createMockUser({ id: '2', username: 'user2' }),
     ];
-    jest.spyOn(mockGetAllUsersUseCase, 'execute').mockResolvedValue(users as User[]);
+    jest.spyOn(mockGetAllUsersUseCase, 'execute').mockResolvedValue(users);
 
     const response = await request(app.getHttpServer()).get('/users/admin').expect(200);
 
-    expect(response.body).toEqual(users);
+    expect(response.body).toEqual([
+      { id: '1', password: 'hashedPassword123', role: 'user', username: 'user1' },
+      { id: '2', password: 'hashedPassword123', role: 'user', username: 'user2' },
+    ]);
     expect(mockGetAllUsersUseCase.execute).toHaveBeenCalledWith({});
   });
 
@@ -116,15 +142,19 @@ describe('UsersController', () => {
 
   it('should delete a user by ID', async () => {
     const userId = '123';
-    jest
-      .spyOn(mockDeleteUserUseCase, 'execute')
-      .mockResolvedValue({ id: userId, username: 'testuser' } as User);
+    const user = createMockUser({ id: userId });
+    jest.spyOn(mockDeleteUserUseCase, 'execute').mockResolvedValue(user);
 
     const response = await request(app.getHttpServer())
       .delete(`/users/admin/${userId}`)
       .expect(200);
 
-    expect(response.body).toEqual({ id: '123', username: 'testuser' });
+    expect(response.body).toEqual({
+      id: '123',
+      username: 'testuser',
+      role: 'user',
+      password: 'hashedPassword123',
+    });
     expect(mockDeleteUserUseCase.execute).toHaveBeenCalledWith(userId);
   });
 });
