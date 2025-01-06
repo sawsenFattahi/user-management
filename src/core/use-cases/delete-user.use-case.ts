@@ -1,6 +1,6 @@
 import { Inject, InternalServerErrorException } from '@nestjs/common';
 
-import { IUserRepository } from '@le-core/interfaces/user-repository.interface';
+import { IUserRepository } from '../interfaces/user-repository.interface';
 
 export class DeleteUserUseCase {
   constructor(

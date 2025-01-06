@@ -1,26 +1,31 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
-import { AuthBlacklistService } from '@le-auth/auth-blacklist.service';
-import { AuthController } from '@le-auth/auth.controller';
-import { GetUserByIdUseCase } from '@le-core/use-cases/get-user-by-id.use-case';
-import { LogoutUserUseCase } from '@le-core/use-cases/logout.use-case';
-import { UserRepositoryAdapter } from '@le-repositories/user-repository.adapter';
-import { UserSchema } from '@le-schemas/user.schema';
-import { JwtStrategy } from '@le-strategies/jwt.strategy';
-import { UsersModule } from '@le-users/users.module';
-import { AuthenticateUserUseCase } from 'src/core/use-cases/authenticate-user.use-case';
+import { JwtStrategy } from '@lesechos/common/strategies/jwt.strategy';
+import { environment } from '@lesechos/config/environment';
+import { AuthenticateUserUseCase } from '@lesechos/core/use-cases/authenticate-user.use-case';
+import { GetUserByIdUseCase } from '@lesechos/core/use-cases/get-user-by-id.use-case';
+import { LogoutUserUseCase } from '@lesechos/core/use-cases/logout.use-case';
+import { UserRepositoryAdapter } from '@lesechos/infrastructure/database/repositories/user-repository.adapter';
+import { UserSchema } from '@lesechos/infrastructure/database/schemas/user.schema';
+import { AuthBlacklistService } from '@lesechos/modules/auth/auth-blacklist.service';
+import { AuthController } from '@lesechos/modules/auth/auth.controller';
+import { UsersModule } from '@lesechos/modules/users/users.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
     UsersModule,
     PassportModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1h' },
+    JwtModule.registerAsync({
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>(environment.JWT_SECRET),
+        signOptions: { expiresIn: '1h' },
+      }),
+      inject: [ConfigService],
     }),
   ],
   controllers: [AuthController],

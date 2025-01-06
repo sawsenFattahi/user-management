@@ -1,11 +1,10 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-
 import { Model, Types } from 'mongoose';
 
-import { User } from '../../../core/entities/user.entity';
-import { IUserRepository } from '../../../core/interfaces/user-repository.interface';
-import { UserDocument } from '../schemas/user.schema';
+import { User } from '@lesechos/core/entities/user.entity';
+import { IUserRepository } from '@lesechos/core/interfaces/user-repository.interface';
+import { UserDocument } from '@lesechos/infrastructure/database/schemas/user.schema';
 
 @Injectable()
 export class UserRepositoryAdapter implements IUserRepository {
@@ -19,6 +18,7 @@ export class UserRepositoryAdapter implements IUserRepository {
     try {
       const userDocument = new this.userModel(user);
       const savedUser = await userDocument.save();
+
       return new User(savedUser.id, savedUser.username, savedUser.password, savedUser.role);
     } catch (error) {
       throw new InternalServerErrorException(`Error checking data: ${error.message}`);
@@ -35,6 +35,7 @@ export class UserRepositoryAdapter implements IUserRepository {
       const updatedUser = await this.userModel
         .findByIdAndUpdate(id, updates, { new: true, runValidators: true })
         .exec();
+
       return new User(updatedUser.id, updatedUser.username, updatedUser.password, updatedUser.role);
     } catch (error) {
       throw new InternalServerErrorException(`Error updating user: ${error.message}`);
@@ -52,7 +53,19 @@ export class UserRepositoryAdapter implements IUserRepository {
     }
     try {
       const user = await this.userModel.findById(id).exec();
-      return user ? new User(user.id, user.username, user.password, user.role) : null;
+
+      return user
+        ? new User(
+            user.id,
+            user.username,
+            user.password,
+            user.role,
+            user.email,
+            user.name,
+            user.address,
+            user.comment
+          )
+        : null;
     } catch (error) {
       throw new InternalServerErrorException(`Error finding user: ${error.message}`);
     }
@@ -64,6 +77,7 @@ export class UserRepositoryAdapter implements IUserRepository {
   async findByUsername(username: string): Promise<User | null> {
     try {
       const user = await this.userModel.findOne({ username }).exec();
+
       return user ? new User(user.id, user.username, user.password, user.role) : null;
     } catch (error) {
       throw new InternalServerErrorException(`Error finding user: ${error.message}`);
@@ -86,6 +100,7 @@ export class UserRepositoryAdapter implements IUserRepository {
         .sort(sort)
         .skip(skip) // Skip documents for pagination
         .limit(limit); // Limit the number of documents returned.exec();
+
       return users.map((user) => new User(user.id, user.username, user.password, user.role));
     } catch (error) {
       throw new InternalServerErrorException(`Error finding users: ${error.message}`);

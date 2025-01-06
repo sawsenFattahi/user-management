@@ -1,20 +1,23 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-
-import { AuthBlacklistService } from '@le-modules/auth/auth-blacklist.service';
-import { UserRepositoryAdapter } from '@le-repositories/user-repository.adapter';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+
+import { environment } from '@lesechos/config/environment';
+import { UserRepositoryAdapter } from '@lesechos/infrastructure/database/repositories/user-repository.adapter';
+import { AuthBlacklistService } from '@lesechos/modules/auth/auth-blacklist.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private readonly blacklistService: AuthBlacklistService,
+    readonly configService: ConfigService,
     private readonly userRepository: UserRepositoryAdapter
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'defaultSecretKey',
+      secretOrKey: configService.get<string>(environment.JWT_SECRET),
       passReqToCallback: true, // Enable access to req in validate
     });
   }
@@ -35,6 +38,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new Error('User not found');
     }
     delete user.password;
+
     return user;
   }
 }

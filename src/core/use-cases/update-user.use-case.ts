@@ -1,8 +1,10 @@
 import { BadRequestException, Inject, NotFoundException } from '@nestjs/common';
-
-import { IUserRepository } from '@le-core/interfaces/user-repository.interface';
-import { User } from '@le-entities/user.entity';
 import { Types } from 'mongoose';
+
+import { ROLE } from '@lesechos/common/enums/role.enum';
+import { User } from '@lesechos/core/entities/user.entity';
+
+import { IUserRepository } from '../interfaces/user-repository.interface';
 
 export class UpdateUserUseCase {
   constructor(
@@ -26,7 +28,7 @@ export class UpdateUserUseCase {
         throw new NotFoundException(`User with ID ${id} not found.`);
       }
 
-      if (existingUser.role !== 'admin') {
+      if ((existingUser.role as unknown) !== (ROLE.ADMIN as unknown)) {
         throw new BadRequestException('Only admins are allowed to update roles.');
       }
     }

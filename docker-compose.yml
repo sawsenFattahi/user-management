@@ -1,27 +1,12 @@
-version: '3.9'
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: les-echos
+    container_name: les-echos-api
     restart: always
     ports:
-      - '3000:3000'
+      - '8080:8080'
     environment:
-      - MONGO_URI=mongodb://mongo:27017/lesechos-db
-    depends_on:
-      - mongo
+      - MONGODB_URI=mongodb://lesechos:lesechos-password@localhost:27017/lesechos
     command: npm run start:prod
-
-  mongo:
-    image: mongo:6
-    container_name: mongo-db
-    restart: always
-    ports:
-      - '27017:27017'
-    volumes:
-      - mongo-data:/data/db
-
-volumes:
-  mongo-data:

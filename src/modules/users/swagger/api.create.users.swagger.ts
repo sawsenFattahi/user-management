@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiResponse, ApiBody } from '@nestjs/swagger';
+import { ApiBody, ApiResponse } from '@nestjs/swagger';
 
 import { CreateUserDto } from '../dto/create-user.dto';
 

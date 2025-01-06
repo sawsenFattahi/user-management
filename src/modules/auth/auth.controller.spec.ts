@@ -1,14 +1,16 @@
-import { INestApplication, UnauthorizedException } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-
-import { RolesGuard } from '@le-common/guards/roles.guard';
-import { LogoutUserUseCase } from '@le-core/use-cases/logout.use-case';
-import { JwtAuthGuard } from '@le-guards/jwt-auth.guard';
-import { AuthenticateUserUseCase } from '@le-use-cases/authenticate-user.use-case';
-import { GetUserByIdUseCase } from '@le-use-cases/get-user-by-id.use-case';
+import { UnauthorizedException } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import * as request from 'supertest';
 
-import { AuthController } from './auth.controller';
+import { JwtAuthGuard } from '@lesechos/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@lesechos/common/guards/roles.guard';
+import { AuthenticateUserUseCase } from '@lesechos/core/use-cases/authenticate-user.use-case';
+import { GetUserByIdUseCase } from '@lesechos/core/use-cases/get-user-by-id.use-case';
+import { LogoutUserUseCase } from '@lesechos/core/use-cases/logout.use-case';
+import { AuthController } from '@lesechos/modules/auth/auth.controller';
+
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('AuthController', () => {
   let app: INestApplication;

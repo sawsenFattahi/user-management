@@ -1,21 +1,21 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-
-import { environment } from '@le-config/environment';
-import { AuthModule } from '@le-modules/auth/auth.module';
-import { UsersModule } from '@le-modules/users/users.module';
 import * as Joi from 'joi';
+
+import { environment } from '@lesechos/config/environment';
+import { AuthModule } from '@lesechos/modules/auth/auth.module';
+import { UsersModule } from '@lesechos/modules/users/users.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(process.env.MONGODB_URI),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
         PORT: Joi.number().required(),
         MONGODB_URI: Joi.string().required(),
+        JWT_SECRET: Joi.string().required(),
       }),
     }),
     MongooseModule.forRootAsync({

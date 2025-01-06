@@ -1,8 +1,9 @@
 import { Inject, InternalServerErrorException } from '@nestjs/common';
 
-import { Role } from '@le-common/enums/role.enum';
-import { User } from '@le-entities/user.entity';
-import { IUserRepository } from '@le-interfaces/user-repository.interface';
+import { ROLE } from '@lesechos/common/enums/role.enum';
+
+import { User } from '../entities/user.entity';
+import { IUserRepository } from '../interfaces/user-repository.interface';
 
 export class RegisterUserUseCase {
   constructor(
@@ -14,7 +15,7 @@ export class RegisterUserUseCase {
     username: string;
     email?: string;
     password: string;
-    role: Role;
+    role: typeof ROLE;
     name?: string;
     address?: Record<string, any>;
     comment?: string;
@@ -24,6 +25,7 @@ export class RegisterUserUseCase {
       input.username,
       input.password,
       input.role,
+      input.email,
       input.name,
       input.address,
       input.comment

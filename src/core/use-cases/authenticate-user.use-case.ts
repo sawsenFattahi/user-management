@@ -1,8 +1,8 @@
 import { Inject, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from 'jsonwebtoken';
 
-import { JwtPayload } from '@le-common/interfaces/jwt-payload.interface';
-import { IUserRepository } from '@le-interfaces/user-repository.interface';
+import { IUserRepository } from '../interfaces/user-repository.interface';
 
 export class AuthenticateUserUseCase {
   constructor(
