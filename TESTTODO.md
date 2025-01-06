@@ -1,6 +1,7 @@
 # TESTTODO File
 ## Tests
 - [ ] Achieve 90% test coverage for the backend.
-- [ ] Add integration tests for the `/auth/login` and `/users/me` endpoints.
-- [ ] Test edge cases for token expiration and invalid inputs.
+- [ ] Add test Database.
+- [ ] Add integration tests for the `/auth` and `/users` endpoints.
+- [ ] Add e2e tests.
 
