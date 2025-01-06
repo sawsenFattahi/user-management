@@ -5,6 +5,7 @@ This file lists tasks, features, and improvements to work on for the project.
 This file lists pending tasks and improvements for the project.
 
 ## General Tasks
+- [ ] Add DTO filter for findAll.
 - [ ] Add unit tests for all services and controllers.
 - [ ] Replace mocks by databse test.
 - [ ] Improve error handling with meaningful messages and status codes.
