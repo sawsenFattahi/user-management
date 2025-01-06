@@ -1,152 +1,123 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { INestApplication, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AuthBlacklistService } from '@le-auth/auth-blacklist.service';
-import { AuthService } from '@le-auth/auth.service';
 import { RolesGuard } from '@le-common/guards/roles.guard';
-import { User } from '@le-entities/user.entity';
+import { LogoutUserUseCase } from '@le-core/use-cases/logout.use-case';
 import { JwtAuthGuard } from '@le-guards/jwt-auth.guard';
-import { UserRepositoryAdapter } from '@le-repositories/user-repository.adapter';
+import { AuthenticateUserUseCase } from '@le-use-cases/authenticate-user.use-case';
+import { GetUserByIdUseCase } from '@le-use-cases/get-user-by-id.use-case';
+import * as request from 'supertest';
 
 import { AuthController } from './auth.controller';
 
 describe('AuthController', () => {
-  let authController: AuthController;
-  let authService: jest.Mocked<AuthService>;
-  let blacklistService: jest.Mocked<AuthBlacklistService>;
-  let userRepository: jest.Mocked<UserRepositoryAdapter>;
+  let app: INestApplication;
+  let mockAuthenticateUserUseCase: AuthenticateUserUseCase;
+  let mockGetUserByIdUseCase: GetUserByIdUseCase;
+  let mockLogoutUserUseCase: LogoutUserUseCase;
 
   beforeEach(async () => {
-    const mockAuthService = {
-      validateUser: jest.fn(),
-      login: jest.fn(),
-    };
-
-    const mockBlacklistService = {
-      addToken: jest.fn(),
-    };
-
-    const mockUserRepository = {
-      findById: jest.fn(),
-    };
+    mockAuthenticateUserUseCase = { execute: jest.fn() } as any;
+    mockGetUserByIdUseCase = { execute: jest.fn() } as any;
+    mockLogoutUserUseCase = { execute: jest.fn() } as any;
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [
-        {
-          provide: AuthService,
-          useValue: mockAuthService,
-        },
-        {
-          provide: AuthBlacklistService,
-          useValue: mockBlacklistService,
-        },
-        {
-          provide: UserRepositoryAdapter,
-          useValue: mockUserRepository,
-        },
+        { provide: AuthenticateUserUseCase, useValue: mockAuthenticateUserUseCase },
+        { provide: GetUserByIdUseCase, useValue: mockGetUserByIdUseCase },
+        { provide: LogoutUserUseCase, useValue: mockLogoutUserUseCase },
       ],
     })
       .overrideGuard(JwtAuthGuard)
-      .useValue({ canActivate: jest.fn(() => true) }) // Mock JwtAuthGuard
+      .useValue({
+        canActivate: jest.fn(() => true), // Allow the guard to pass
+        getRequest: jest.fn(() => ({
+          user: { id: '123', username: 'testuser', role: 'user' }, // Mocked user object
+        })),
+      })
+
       .overrideGuard(RolesGuard)
-      .useValue({ canActivate: jest.fn(() => true) }) // Mock RolesGuard
+      .useValue({ canActivate: jest.fn(() => true) })
       .compile();
 
-    authController = module.get<AuthController>(AuthController);
-    authService = module.get(AuthService);
-    blacklistService = module.get(AuthBlacklistService);
-    userRepository = module.get(UserRepositoryAdapter);
+    app = module.createNestApplication();
+    await app.init();
   });
 
-  it('should be defined', () => {
-    expect(authController).toBeDefined();
+  afterEach(async () => {
+    await app.close();
   });
 
-  describe('login', () => {
-    it('should return a JWT token for valid credentials', async () => {
-      const body = { username: 'testuser', password: 'password123' };
-      const mockUser = { id: '1', username: 'testuser', role: 'user' };
-      const mockToken: { access_token: string } = { access_token: 'test-jwt-token' };
+  function createMockUser(overrides = {}): any {
+    return {
+      id: '123',
+      username: 'testuser',
+      role: 'user',
+      password: 'hashedPassword123',
+      hashPassword: jest.fn(),
+      validatePassword: jest.fn(),
+      ...overrides, // Allow overriding default properties
+    };
+  }
 
-      authService.validateUser.mockResolvedValue(mockUser);
-      authService.login.mockResolvedValue(mockToken);
+  it('should log in a user and return a JWT token', async () => {
+    const credentials = { username: 'testuser', password: 'password123' };
+    const tokenResponse = { access_token: 'jwt-token' };
 
-      const result = await authController.login(body);
+    jest.spyOn(mockAuthenticateUserUseCase, 'execute').mockResolvedValue(tokenResponse);
 
-      expect(result).toEqual(mockToken);
-      expect(authService.validateUser).toHaveBeenCalledWith(body.username, body.password);
-      expect(authService.login).toHaveBeenCalledWith(mockUser);
-    });
+    const response = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send(credentials)
+      .expect(201);
 
-    it('should throw UnauthorizedException for invalid credentials', async () => {
-      const body = { username: 'wronguser', password: 'wrongpassword' };
-
-      authService.validateUser.mockResolvedValue(null);
-
-      await expect(authController.login(body)).rejects.toThrow(UnauthorizedException);
-      expect(authService.validateUser).toHaveBeenCalledWith(body.username, body.password);
-      expect(authService.login).not.toHaveBeenCalled();
-    });
+    expect(response.body).toEqual(tokenResponse);
+    expect(mockAuthenticateUserUseCase.execute).toHaveBeenCalledWith(credentials);
   });
 
-  describe('getCurrentUser', () => {
-    it('should return current user details', async () => {
-      const mockUserId = '1';
-      const req = { user: { id: mockUserId } };
-      const mockUser = { id: mockUserId, username: 'testuser', role: 'user' };
+  it('should get the current user information', async () => {
+    const user = createMockUser();
+    jest.spyOn(mockGetUserByIdUseCase, 'execute').mockResolvedValue(user);
 
-      userRepository.findById.mockResolvedValue(mockUser as User);
+    const response = await request(app.getHttpServer())
+      .get('/auth/me')
+      .set('Authorization', 'Bearer some-token') // Simulate a valid token
+      .expect(200);
 
-      const result = await authController.getCurrentUser(req);
-
-      expect(result).toEqual(mockUser);
-      expect(userRepository.findById).toHaveBeenCalledWith(mockUserId);
-    });
-
-    it('should throw UnauthorizedException if user ID is missing', async () => {
-      const req = { user: null };
-
-      await expect(authController.getCurrentUser(req)).rejects.toThrow(UnauthorizedException);
-      expect(userRepository.findById).not.toHaveBeenCalled();
-    });
-
-    it('should throw UnauthorizedException if user is not found', async () => {
-      const mockUserId = '1';
-      const req = { user: { id: mockUserId } };
-
-      userRepository.findById.mockResolvedValue(null);
-
-      await expect(authController.getCurrentUser(req)).rejects.toThrow(UnauthorizedException);
-      expect(userRepository.findById).toHaveBeenCalledWith(mockUserId);
-    });
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        id: user.id,
+        username: user.username,
+        role: user.role,
+      })
+    );
   });
 
-  describe('logout', () => {
-    it('should blacklist the token and return a success message', async () => {
-      const mockToken = 'test-token';
-      const req = {
-        headers: { authorization: `Bearer ${mockToken}` },
-      };
+  it('should log out a user and return a confirmation message', async () => {
+    const authHeader = 'Bearer some-token';
+    const logoutResponse = { message: 'Logged out successfully' };
 
-      const result = await authController.logout(req);
+    jest.spyOn(mockLogoutUserUseCase, 'execute').mockResolvedValue(logoutResponse);
 
-      expect(result).toEqual({ message: 'Logged out successfully' });
-      expect(blacklistService.addToken).toHaveBeenCalledWith(mockToken);
+    const response = await request(app.getHttpServer())
+      .post('/auth/logout')
+      .set('Authorization', authHeader)
+      .expect(201);
+
+    expect(response.body).toEqual(logoutResponse);
+    expect(mockLogoutUserUseCase.execute).toHaveBeenCalledWith(authHeader);
+  });
+
+  it('should return 401 if no Authorization header is provided during logout', async () => {
+    jest.spyOn(mockLogoutUserUseCase, 'execute').mockImplementation(() => {
+      throw new UnauthorizedException('Unauthorized');
     });
 
-    it('should throw UnauthorizedException if authorization header is missing', async () => {
-      const req = { headers: {} };
+    const response = await request(app.getHttpServer())
+      .post('/auth/logout') // No Authorization header
+      .expect(401); // Expect 401 Unauthorized
 
-      await expect(authController.logout(req)).rejects.toThrow(UnauthorizedException);
-      expect(blacklistService.addToken).not.toHaveBeenCalled();
-    });
-
-    it('should throw UnauthorizedException if token is missing', async () => {
-      const req = { headers: { authorization: 'Bearer ' } };
-
-      await expect(authController.logout(req)).rejects.toThrow(UnauthorizedException);
-      expect(blacklistService.addToken).not.toHaveBeenCalled();
-    });
+    expect(response.body.message).toEqual('Unauthorized');
   });
 });
