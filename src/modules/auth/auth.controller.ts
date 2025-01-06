@@ -6,7 +6,7 @@ import { Roles } from '@lesechos/common/decorators/roles.decorator';
 import { ROLE } from '@lesechos/common/enums/role.enum';
 import { JwtAuthGuard } from '@lesechos/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@lesechos/common/guards/roles.guard';
-import { AuthenticateUserUseCase } from 'authenticate-user.use-case';
+import { AuthenticateUserUseCase } from '@lesechos/modules/auth/use-cases/authenticate-user.use-case';
 import { GetUserByIdUseCase } from '@lesechos/modules/users/use-cases/get-user-by-id.use-case';
 import { LogoutUserUseCase } from '@lesechos/modules/users/use-cases/logout.use-case';
 import { ApiGetMeResponse } from '@lesechos/modules/users/swagger/api.get.me.swagger';

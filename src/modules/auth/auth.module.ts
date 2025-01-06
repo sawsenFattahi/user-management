@@ -12,7 +12,7 @@ import { UserRepositoryAdapter } from '@lesechos/modules/users/database/reposito
 import { GetUserByIdUseCase } from '@lesechos/modules/users/use-cases/get-user-by-id.use-case';
 import { LogoutUserUseCase } from '@lesechos/modules/users/use-cases/logout.use-case';
 import { UsersModule } from '@lesechos/modules/users/users.module';
-import { AuthenticateUserUseCase } from 'authenticate-user.use-case';
+import { AuthenticateUserUseCase } from '@lesechos/modules/auth/use-cases/authenticate-user.use-case';
 
 @Module({
   imports: [

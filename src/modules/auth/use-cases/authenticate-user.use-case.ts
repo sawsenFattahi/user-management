@@ -4,7 +4,7 @@ import { JwtPayload } from 'jsonwebtoken';
 
 import { validatePassword } from '@lesechos/common/utils/validate-password';
 
-import { IUserRepository } from './src/modules/users/interfaces/user-repository.interface';
+import { IUserRepository } from '../../users/interfaces/user-repository.interface';
 
 export class AuthenticateUserUseCase {
   constructor(
