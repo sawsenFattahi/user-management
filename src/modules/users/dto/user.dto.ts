@@ -1,27 +1,22 @@
-import {
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsObject,
-  IsOptional,
-  IsString,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 
 import { ROLE, Role } from '@lesechos/common/enums/role.enum';
 
 /**
  * DTO for creating a user
  */
-export class CreateUserDto {
+export class UserDto {
+  @IsString()
+  @IsNotEmpty()
+  id: string;
+
   @IsString()
   @IsNotEmpty()
   username: string;
 
   @IsString()
-  @MinLength(8, { message: 'Password must be at least 8 characters long.' })
-  @IsNotEmpty()
-  password: string;
+  @IsOptional()
+  password?: string;
 
   @IsEmail()
   @IsOptional()

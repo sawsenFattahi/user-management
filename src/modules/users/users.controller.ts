@@ -17,13 +17,14 @@ import { Roles } from '@lesechos/common/decorators/roles.decorator';
 import { ROLE } from '@lesechos/common/enums/role.enum';
 import { JwtAuthGuard } from '@lesechos/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@lesechos/common/guards/roles.guard';
-import { DeleteUserUseCase } from '@lesechos/core/use-cases/delete-user.use-case';
-import { GetAllUsersUseCase } from '@lesechos/core/use-cases/get-all-users.use-case';
-import { GetUserByIdUseCase } from '@lesechos/core/use-cases/get-user-by-id.use-case';
-import { RegisterUserUseCase } from '@lesechos/core/use-cases/register-user.use-case';
-import { UpdateUserUseCase } from '@lesechos/core/use-cases/update-user.use-case';
 import { CreateUserDto } from '@lesechos/modules/users/dto/create-user.dto';
 import { UpdateUserDto } from '@lesechos/modules/users/dto/update-user.dto';
+import { UserDto } from '@lesechos/modules/users/dto/user.dto';
+import { DeleteUserUseCase } from '@lesechos/modules/users/use-cases/delete-user.use-case';
+import { GetAllUsersUseCase } from '@lesechos/modules/users/use-cases/get-all-users.use-case';
+import { GetUserByIdUseCase } from '@lesechos/modules/users/use-cases/get-user-by-id.use-case';
+import { RegisterUserUseCase } from '@lesechos/modules/users/use-cases/register-user.use-case';
+import { UpdateUserUseCase } from '@lesechos/modules/users/use-cases/update-user.use-case';
 
 import {
   ApiCreateUserBody,
@@ -74,7 +75,7 @@ export class UsersController {
   @ApiUpdateUserBody()
   @ApiUpdateUserResponse()
   @Patch('me')
-  async updateCurrentUser(@Req() req: any, @Body() updates: UpdateUserDto) {
+  async updateCurrentUser(@Req() req: any, @Body() updates: UpdateUserDto): Promise<UserDto> {
     return this.updateUserUseCase.execute(req?.user?.id, updates);
   }
 

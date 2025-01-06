@@ -3,16 +3,16 @@ import * as request from 'supertest';
 
 import { JwtAuthGuard } from '@lesechos/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@lesechos/common/guards/roles.guard';
-import { DeleteUserUseCase } from '@lesechos/core/use-cases/delete-user.use-case';
-import { GetAllUsersUseCase } from '@lesechos/core/use-cases/get-all-users.use-case';
-import { GetUserByIdUseCase } from '@lesechos/core/use-cases/get-user-by-id.use-case';
-import { RegisterUserUseCase } from '@lesechos/core/use-cases/register-user.use-case';
-import { UpdateUserUseCase } from '@lesechos/core/use-cases/update-user.use-case';
-import { UserRepositoryAdapter } from '@lesechos/infrastructure/database/repositories/user-repository.adapter';
+import { DeleteUserUseCase } from '@lesechos/modules/users/use-cases/delete-user.use-case';
+import { GetAllUsersUseCase } from '@lesechos/modules/users/use-cases/get-all-users.use-case';
+import { GetUserByIdUseCase } from '@lesechos/modules/users/use-cases/get-user-by-id.use-case';
+import { RegisterUserUseCase } from '@lesechos/modules/users/use-cases/register-user.use-case';
+import { UpdateUserUseCase } from '@lesechos/modules/users/use-cases/update-user.use-case';
+import { UserRepositoryAdapter } from '@lesechos/modules/users/database/repositories/user-repository.adapter';
 
 import { UsersController } from './users.controller';
 
-import type { User } from '@lesechos/core/entities/user.entity';
+import type { User } from '@lesechos/modules/users/entities/user.entity';
 import type { INestApplication } from '@nestjs/common';
 import type { TestingModule } from '@nestjs/testing';
 

@@ -4,8 +4,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { environment } from '@lesechos/config/environment';
-import { UserRepositoryAdapter } from '@lesechos/infrastructure/database/repositories/user-repository.adapter';
 import { AuthBlacklistService } from '@lesechos/modules/auth/auth-blacklist.service';
+import { UserRepositoryAdapter } from '@lesechos/modules/users/database/repositories/user-repository.adapter';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -33,7 +33,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (this.blacklistService.isTokenBlacklisted(token)) {
       throw new UnauthorizedException('Token is blacklisted');
     }
-    const user = await this.userRepository.findById(payload.sub);
+    const user = await this.userRepository.findById(payload.sub, true);
     if (!user) {
       throw new Error('User not found');
     }
