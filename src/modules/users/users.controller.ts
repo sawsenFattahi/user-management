@@ -14,11 +14,16 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { Public } from '@le-common/decorators/public.decorator';
 import { Role } from '@le-common/enums/role.enum';
+import { DeleteUserUseCase } from '@le-core/use-cases/delete-user.use-case';
+import { UpdateUserUseCase } from '@le-core/use-cases/update-user.use-case';
 import { Roles } from '@le-decorators/roles.decorator';
 import { User } from '@le-entities/user.entity';
 import { JwtAuthGuard } from '@le-guards/jwt-auth.guard';
 import { RolesGuard } from '@le-guards/roles.guard';
 import { UserRepositoryAdapter } from '@le-repositories/user-repository.adapter';
+import { GetAllUsersUseCase } from '@le-use-cases/get-all-users.use-case';
+import { GetUserByIdUseCase } from '@le-use-cases/get-user-by-id.use-case';
+import { RegisterUserUseCase } from '@le-use-cases/register-user.use-case';
 import { CreateUserDto } from '@le-users/dto/create-user.dto';
 import { UpdateUserDto } from '@le-users/dto/update-user.dto';
 import {
@@ -34,7 +39,14 @@ import {
 @ApiTags('Users') // Group under "Users" in Swagger
 @Controller('users')
 export class UsersController {
-  constructor(private readonly userRepository: UserRepositoryAdapter) {}
+  constructor(
+    private readonly userRepository: UserRepositoryAdapter,
+    private readonly registerUserUseCase: RegisterUserUseCase,
+    private readonly getAllUsersUseCase: GetAllUsersUseCase,
+    private readonly getUserByIdUseCase: GetUserByIdUseCase,
+    private readonly updateUserUseCase: UpdateUserUseCase,
+    private readonly deleteUserUseCase: DeleteUserUseCase
+  ) {}
 
   /**
    * Create a new user
@@ -47,7 +59,7 @@ export class UsersController {
   @ApiCreateUserBody()
   @ApiCreateUserResponse()
   async create(@Body() createUserDto: CreateUserDto) {
-    return this.userRepository.create(createUserDto as User);
+    return this.registerUserUseCase.execute(createUserDto as User);
   }
 
   /**
@@ -65,13 +77,7 @@ export class UsersController {
   @ApiUpdateUserResponse()
   @Patch('me')
   async updateCurrentUser(@Req() req: any, @Body() updates: UpdateUserDto) {
-    const id = req.user?.id;
-    console.log('id from controller', id);
-    if (!id) {
-      throw new Error('User ID is missing from request');
-    }
-    const User: Partial<User> = { ...updates };
-    return this.userRepository.update(id, User);
+    return this.updateUserUseCase.execute(req?.user?.id, updates);
   }
 
   /**
@@ -85,9 +91,10 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a user by UID' })
   @ApiGetOneUserResponse()
-  @Get(':uid')
+  @Get('admin/:id')
   async findOne(@Param('id') id: string) {
-    return this.userRepository.findById(id);
+    console.log('id from controller', id);
+    return this.getUserByIdUseCase.execute(id);
   }
 
   /**
@@ -102,11 +109,9 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a list of all users' })
   @ApiFindAllUsersResponse()
-  @Get()
+  @Get('admin')
   async findAll(@Query('filters') filters: string, @Query('sort') sort: string) {
-    const parsedFilters = filters ? JSON.parse(filters) : {};
-    const parsedSort = sort ? JSON.parse(sort) : {};
-    return this.userRepository.findAll(parsedFilters, parsedSort);
+    return this.getAllUsersUseCase.execute({ filters, sort });
   }
 
   /**
@@ -122,25 +127,24 @@ export class UsersController {
   @ApiOperation({ summary: 'Update a user by UID (Admin only)' })
   @ApiUpdateUserBody()
   @ApiUpdateUserResponse()
-  @Patch('admin/:uid')
+  @Patch('admin/:id')
   async updateUserByAdmin(@Param('id') id: string, @Body() updates: UpdateUserDto) {
-    const User: Partial<User> = { ...updates };
-    return this.userRepository.update(id, User);
+    return this.updateUserUseCase.execute(id, updates);
   }
 
   /**
    * Delete a user by UID
    * Accessible to Admin role only.
-   * @param uid - User ID
+   * @param id - User ID
    * @returns A confirmation message
    */
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete a user by UID (Admin only)' })
+  @ApiOperation({ summary: 'Delete a user by ID (Admin only)' })
   @ApiDeleteUserResponse()
-  @Delete('admin/:uid')
-  async deleteUser(@Param('uid') uid: string) {
-    return this.userRepository.delete(uid);
+  @Delete('admin/:id')
+  async deleteUser(@Param('id') id: string) {
+    return this.deleteUserUseCase.execute(id);
   }
 }

@@ -1,23 +1,23 @@
-import { Controller, Post, Body, UseGuards, UnauthorizedException, Req, Get } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { AuthBlacklistService } from '@le-auth/auth-blacklist.service';
-import { AuthService } from '@le-auth/auth.service';
 import { Public } from '@le-common/decorators/public.decorator';
 import { Roles } from '@le-common/decorators/roles.decorator';
 import { Role } from '@le-common/enums/role.enum';
 import { RolesGuard } from '@le-common/guards/roles.guard';
+import { LogoutUserUseCase } from '@le-core/use-cases/logout.use-case';
 import { JwtAuthGuard } from '@le-guards/jwt-auth.guard';
 import { ApiGetMeResponse } from '@le-modules/users/swagger/api.get.me.swagger';
-import { UserRepositoryAdapter } from '@le-repositories/user-repository.adapter';
+import { AuthenticateUserUseCase } from '@le-use-cases/authenticate-user.use-case';
+import { GetUserByIdUseCase } from '@le-use-cases/get-user-by-id.use-case';
 
 @ApiTags('Authentication') // Group under "Authentication" in Swagger
 @Controller('auth')
 export class AuthController {
   constructor(
-    private readonly authService: AuthService,
-    private readonly blacklistService: AuthBlacklistService,
-    private readonly userRepository: UserRepositoryAdapter
+    private readonly authenticateUserUseCase: AuthenticateUserUseCase,
+    private readonly getUserByIdUseCase: GetUserByIdUseCase,
+    private readonly logoutUserUseCase: LogoutUserUseCase
   ) {}
 
   /**
@@ -38,15 +38,8 @@ export class AuthController {
       },
     },
   })
-  async login(@Body() body: { username: string; password: string }) {
-    const { username, password } = body;
-
-    const user = await this.authService.validateUser(username, password);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    return this.authService.login(user);
+  async login(@Body() { username, password }: { username: string; password: string }) {
+    return this.authenticateUserUseCase.execute({ username, password });
   }
 
   /**
@@ -61,18 +54,7 @@ export class AuthController {
   @ApiGetMeResponse()
   @Get('me')
   async getCurrentUser(@Req() req: any) {
-    const userId = req.user?.id;
-    console.log('id from controller', req.user);
-    if (!userId) {
-      throw new UnauthorizedException('Invalid user data');
-    }
-
-    const user = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-
-    return user; // Return full user details
+    return this.getUserByIdUseCase.execute(req?.user?.id);
   }
 
   /**
@@ -86,19 +68,6 @@ export class AuthController {
   @ApiOperation({ summary: 'User logout' })
   @ApiBearerAuth()
   async logout(@Req() req: any) {
-    const authHeader = req.headers?.authorization;
-    if (!authHeader) {
-      throw new UnauthorizedException('Authorization header is missing');
-    }
-
-    const token = authHeader.split(' ')[1];
-    if (!token) {
-      throw new UnauthorizedException('Bearer token is missing');
-    }
-
-    // Blacklist the token
-    await this.blacklistService.addToken(token);
-
-    return { message: 'Logged out successfully' };
+    return this.logoutUserUseCase.execute(req.headers?.authorization);
   }
 }

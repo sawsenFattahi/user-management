@@ -1,152 +1,130 @@
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { Role } from '@le-common/enums/role.enum';
 import { User } from '@le-entities/user.entity';
+import { JwtAuthGuard } from '@le-guards/jwt-auth.guard';
+import { RolesGuard } from '@le-guards/roles.guard';
 import { UserRepositoryAdapter } from '@le-repositories/user-repository.adapter';
-import { CreateUserDto } from '@le-users/dto/create-user.dto';
-import { UpdateUserDto } from '@le-users/dto/update-user.dto';
+import { DeleteUserUseCase } from '@le-use-cases/delete-user.use-case';
+import { GetAllUsersUseCase } from '@le-use-cases/get-all-users.use-case';
+import { GetUserByIdUseCase } from '@le-use-cases/get-user-by-id.use-case';
+import { RegisterUserUseCase } from '@le-use-cases/register-user.use-case';
+import { UpdateUserUseCase } from '@le-use-cases/update-user.use-case';
+import * as request from 'supertest';
 
 import { UsersController } from './users.controller';
 
 describe('UsersController', () => {
-  let usersController: UsersController;
-  let userRepository: jest.Mocked<UserRepositoryAdapter>;
+  let app: INestApplication;
+  let mockRegisterUserUseCase: RegisterUserUseCase;
+  let mockGetAllUsersUseCase: GetAllUsersUseCase;
+  let mockGetUserByIdUseCase: GetUserByIdUseCase;
+  let mockUpdateUserUseCase: UpdateUserUseCase;
+  let mockDeleteUserUseCase: DeleteUserUseCase;
+  const mockUserRepositoryAdapter = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+  };
 
   beforeEach(async () => {
-    const mockUserRepository = {
-      create: jest.fn(),
-      update: jest.fn(),
-      findById: jest.fn(),
-      findAll: jest.fn(),
-      delete: jest.fn(),
-    };
+    mockRegisterUserUseCase = { execute: jest.fn() } as any;
+    mockGetAllUsersUseCase = { execute: jest.fn() } as any;
+    mockGetUserByIdUseCase = { execute: jest.fn() } as any;
+    mockUpdateUserUseCase = { execute: jest.fn() } as any;
+    mockDeleteUserUseCase = { execute: jest.fn() } as any;
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
       providers: [
-        {
-          provide: UserRepositoryAdapter,
-          useValue: mockUserRepository,
-        },
+        { provide: UserRepositoryAdapter, useValue: mockUserRepositoryAdapter },
+        { provide: RegisterUserUseCase, useValue: mockRegisterUserUseCase },
+        { provide: GetAllUsersUseCase, useValue: mockGetAllUsersUseCase },
+        { provide: GetUserByIdUseCase, useValue: mockGetUserByIdUseCase },
+        { provide: UpdateUserUseCase, useValue: mockUpdateUserUseCase },
+        { provide: DeleteUserUseCase, useValue: mockDeleteUserUseCase },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) }) // Mock JWT Guard
+      .overrideGuard(RolesGuard)
+      .useValue({ canActivate: jest.fn(() => true) }) // Mock Roles Guard
+      .compile();
 
-    usersController = module.get<UsersController>(UsersController);
-    userRepository = module.get(UserRepositoryAdapter);
+    app = module.createNestApplication();
+    await app.init();
   });
 
-  it('should be defined', () => {
-    expect(usersController).toBeDefined();
+  afterEach(async () => {
+    await app.close();
   });
 
-  describe('create', () => {
-    it('should create a user', async () => {
-      const createUserDto: CreateUserDto = {
-        id: '1',
-        username: 'testuser',
-        password: 'password123',
-        role: Role.User,
-      };
+  it('should create a new user', async () => {
+    const createUserDto = { username: 'testuser', password: 'password123', role: 'user' };
+    const createdUser = { id: '123', ...createUserDto };
+    jest.spyOn(mockRegisterUserUseCase, 'execute').mockResolvedValue(createdUser as User);
 
-      const createdUser = {
-        id: '1',
-        username: createUserDto.username,
-        password: createUserDto.password,
-        role: createUserDto.role,
-      };
+    const response = await request(app.getHttpServer())
+      .post('/users')
+      .send(createUserDto)
+      .expect(201);
 
-      userRepository.create.mockResolvedValue(createdUser as User);
-
-      const result = await usersController.create(createUserDto);
-      expect(result).toEqual(createdUser);
-      expect(userRepository.create).toHaveBeenCalledWith(createUserDto);
-    });
+    expect(response.body).toEqual(createdUser);
+    expect(mockRegisterUserUseCase.execute).toHaveBeenCalledWith(createUserDto);
   });
 
-  describe('updateCurrentUser', () => {
-    it('should update current user information', async () => {
-      const updateUserDto: UpdateUserDto = { name: 'Updated Name' };
-      const req = { user: { id: '1' } };
+  it('should get a user by ID', async () => {
+    const userId = '123';
+    const user = { id: userId, username: 'testuser' };
+    jest.spyOn(mockGetUserByIdUseCase, 'execute').mockResolvedValue(user as User);
 
-      const updatedUser = {
-        id: req.user.id,
-        username: 'testuser',
-        role: Role.User,
-        ...updateUserDto,
-      };
+    const response = await request(app.getHttpServer()).get(`/users/admin/${userId}`).expect(200);
 
-      userRepository.update.mockResolvedValue(updatedUser as User);
-
-      const result = await usersController.updateCurrentUser(req, updateUserDto);
-      expect(result).toEqual(updatedUser);
-      expect(userRepository.update).toHaveBeenCalledWith(req.user.id, updateUserDto);
-    });
-
-    it('should throw an error if user ID is missing', async () => {
-      const updateUserDto: UpdateUserDto = { name: 'Updated Name' };
-      const req = { user: null };
-
-      await expect(usersController.updateCurrentUser(req, updateUserDto)).rejects.toThrow(
-        'User ID is missing from request'
-      );
-    });
+    expect(response.body).toEqual(user);
+    expect(mockGetUserByIdUseCase.execute).toHaveBeenCalledWith(userId);
   });
 
-  describe('findOne', () => {
-    it('should return a user by ID', async () => {
-      const userId = '1';
-      const user = { id: userId, username: 'testuser', role: Role.User };
+  it('should get all users', async () => {
+    const users = [
+      { id: '1', username: 'user1' },
+      { id: '2', username: 'user2' },
+    ];
+    jest.spyOn(mockGetAllUsersUseCase, 'execute').mockResolvedValue(users as User[]);
 
-      userRepository.findById.mockResolvedValue(user as User);
+    const response = await request(app.getHttpServer()).get('/users/admin').expect(200);
 
-      const result = await usersController.findOne(userId);
-      expect(result).toEqual(user);
-      expect(userRepository.findById).toHaveBeenCalledWith(userId);
-    });
+    expect(response.body).toEqual(users);
+    expect(mockGetAllUsersUseCase.execute).toHaveBeenCalledWith({});
   });
 
-  describe('findAll', () => {
-    it('should return a list of users', async () => {
-      const filters = { role: Role.User };
-      const sort = { username: 'asc' };
-      const users = [
-        { id: '1', username: 'user1', role: Role.User },
-        { id: '2', username: 'user2', role: Role.User },
-      ];
+  it('should update a user by ID', async () => {
+    const userId = '123';
+    const updateDto = { username: 'updateduser' };
+    const updatedUser = { id: userId, ...updateDto };
+    jest.spyOn(mockUpdateUserUseCase, 'execute').mockResolvedValue(updatedUser as User);
 
-      userRepository.findAll.mockResolvedValue(users as User[]);
+    const response = await request(app.getHttpServer())
+      .patch(`/users/admin/${userId}`)
+      .send(updateDto)
+      .expect(200);
 
-      const result = await usersController.findAll(JSON.stringify(filters), JSON.stringify(sort));
-      expect(result).toEqual(users);
-      expect(userRepository.findAll).toHaveBeenCalledWith(filters, sort);
-    });
+    expect(response.body).toEqual(updatedUser);
+    expect(mockUpdateUserUseCase.execute).toHaveBeenCalledWith(userId, updateDto);
   });
 
-  describe('updateUserByAdmin', () => {
-    it('should update a user by admin', async () => {
-      const userId = '1';
-      const updateUserDto: UpdateUserDto = { role: Role.Admin };
+  it('should delete a user by ID', async () => {
+    const userId = '123';
+    jest
+      .spyOn(mockDeleteUserUseCase, 'execute')
+      .mockResolvedValue({ id: userId, username: 'testuser' } as User);
 
-      const updatedUser = { id: userId, username: 'testuser', role: Role.Admin };
+    const response = await request(app.getHttpServer())
+      .delete(`/users/admin/${userId}`)
+      .expect(200);
 
-      userRepository.update.mockResolvedValue(updatedUser as User);
-
-      const result = await usersController.updateUserByAdmin(userId, updateUserDto);
-      expect(result).toEqual(updatedUser);
-      expect(userRepository.update).toHaveBeenCalledWith(userId, updateUserDto);
-    });
-  });
-
-  describe('deleteUser', () => {
-    it('should delete a user by ID', async () => {
-      const userId = '1';
-      const deletedUser = { id: userId, username: 'testuser', role: Role.User };
-
-      userRepository.delete.mockResolvedValue(deletedUser as User);
-
-      const result = await usersController.deleteUser(userId);
-      expect(result).toEqual(deletedUser);
-      expect(userRepository.delete).toHaveBeenCalledWith(userId);
-    });
+    expect(response.body).toEqual({ id: '123', username: 'testuser' });
+    expect(mockDeleteUserUseCase.execute).toHaveBeenCalledWith(userId);
   });
 });

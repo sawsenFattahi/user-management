@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { Model, Types } from 'mongoose';
@@ -13,58 +13,61 @@ export class UserRepositoryAdapter implements IUserRepository {
 
   /**
    * Create a new user in the database.
+   * Throws InternalServerErrorException if there is an error creating the user.
    */
   async create(user: User): Promise<User> {
-    // Check if the username already exists
-    const existingUser = await this.userModel.findOne({ username: user.username }).exec();
-
-    if (existingUser) {
-      throw new BadRequestException(`Username "${user.username}" is already taken.`);
+    try {
+      const userDocument = new this.userModel(user);
+      const savedUser = await userDocument.save();
+      return new User(savedUser.id, savedUser.username, savedUser.password, savedUser.role);
+    } catch (error) {
+      throw new InternalServerErrorException(`Error checking data: ${error.message}`);
     }
-    const userDocument = new this.userModel(user);
-    const savedUser = await userDocument.save();
-    return new User(savedUser.id, savedUser.username, savedUser.password, savedUser.role);
   }
 
   /**
    * Update an existing user by ID.
+   * Throws NotFoundException if the user is not found.
+   * Throws InternalServerErrorException if there is an error updating the user.
    */
   async update(id: string, updates: Partial<User>): Promise<User> {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new NotFoundException(`Invalid ID format: ${id}`);
+    try {
+      const updatedUser = await this.userModel
+        .findByIdAndUpdate(id, updates, { new: true, runValidators: true })
+        .exec();
+      return new User(updatedUser.id, updatedUser.username, updatedUser.password, updatedUser.role);
+    } catch (error) {
+      throw new InternalServerErrorException(`Error updating user: ${error.message}`);
     }
-
-    await this.validateRestrictedFields(id, updates);
-
-    const updatedUser = await this.userModel
-      .findByIdAndUpdate(id, updates, { new: true, runValidators: true })
-      .exec();
-
-    if (!updatedUser) {
-      throw new NotFoundException(`User with ID ${id} not found.`);
-    }
-
-    return new User(updatedUser.id, updatedUser.username, updatedUser.password, updatedUser.role);
   }
 
   /**
    * Find a user by ID.
+   * Throws NotFoundException if the user is not found.
+   * Throws InternalServerErrorException if there is an error finding the user.
    */
   async findById(id: string): Promise<User | null> {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException(`Invalid ID format: ${id}`);
     }
-
-    const user = await this.userModel.findById(id).exec();
-    return user ? new User(user.id, user.username, user.password, user.role) : null;
+    try {
+      const user = await this.userModel.findById(id).exec();
+      return user ? new User(user.id, user.username, user.password, user.role) : null;
+    } catch (error) {
+      throw new InternalServerErrorException(`Error finding user: ${error.message}`);
+    }
   }
 
   /**
    * Find a user by username.
    */
   async findByUsername(username: string): Promise<User | null> {
-    const user = await this.userModel.findOne({ username }).exec();
-    return user ? new User(user.id, user.username, user.password, user.role) : null;
+    try {
+      const user = await this.userModel.findOne({ username }).exec();
+      return user ? new User(user.id, user.username, user.password, user.role) : null;
+    } catch (error) {
+      throw new InternalServerErrorException(`Error finding user: ${error.message}`);
+    }
   }
 
   /**
@@ -72,49 +75,42 @@ export class UserRepositoryAdapter implements IUserRepository {
    */
   async findAll(
     filters: Partial<User> = {},
-    sort: Record<string, 'asc' | 'desc' | 1 | -1> = {}
+    sort: Record<string, 'asc' | 'desc' | 1 | -1> = {},
+    page: number = 1,
+    limit: number = 10
   ): Promise<User[]> {
-    const users = await this.userModel.find(filters).sort(sort).exec();
-
-    return users.map((user) => new User(user.id, user.username, user.password, user.role));
+    try {
+      const skip = (page - 1) * limit;
+      const users = await this.userModel
+        .find(filters)
+        .sort(sort)
+        .skip(skip) // Skip documents for pagination
+        .limit(limit); // Limit the number of documents returned.exec();
+      return users.map((user) => new User(user.id, user.username, user.password, user.role));
+    } catch (error) {
+      throw new InternalServerErrorException(`Error finding users: ${error.message}`);
+    }
   }
 
   /**
    * Delete a user by ID.
+   * Throws NotFoundException if the user is not found.
+   * Throws InternalServerErrorException if there is an error deleting the user.
    */
   async delete(id: string): Promise<User> {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException(`Invalid ID format: ${id}`);
     }
+    try {
+      const deletedUser = await this.userModel.findByIdAndDelete(id).exec();
 
-    const deletedUser = await this.userModel.findByIdAndDelete(id).exec();
-
-    if (!deletedUser) {
-      throw new NotFoundException(`User with ID ${id} not found.`);
-    }
-
-    return new User(deletedUser.id, deletedUser.username, deletedUser.password, deletedUser.role);
-  }
-
-  /**
-   * Validate restricted fields for updates.
-   * Prevent updates to 'username' and ensure only admins can update 'role'.
-   */
-  private async validateRestrictedFields(id: string, updates: Partial<User>): Promise<void> {
-    if ('username' in updates) {
-      throw new BadRequestException('Updating the username is not allowed.');
-    }
-
-    if ('role' in updates) {
-      const user = await this.userModel.findById(id).exec();
-
-      if (!user) {
+      if (!deletedUser) {
         throw new NotFoundException(`User with ID ${id} not found.`);
       }
 
-      if (user.role !== 'admin') {
-        throw new BadRequestException('Only admins are allowed to update roles.');
-      }
+      return new User(deletedUser.id, deletedUser.username, deletedUser.password, deletedUser.role);
+    } catch (error) {
+      throw new InternalServerErrorException(`Error finding user: ${error.message}`);
     }
   }
 }
