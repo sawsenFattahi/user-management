@@ -2,7 +2,8 @@ import { BadRequestException, Inject, NotFoundException } from '@nestjs/common';
 import { Types } from 'mongoose';
 
 import { ROLE } from '@lesechos/common/enums/role.enum';
-import { User } from '@lesechos/core/entities/user.entity';
+import { UserDto } from '@lesechos/modules/users/dto/user.dto';
+import { User } from '@lesechos/modules/users/entities/user.entity';
 
 import { IUserRepository } from '../interfaces/user-repository.interface';
 
@@ -12,7 +13,7 @@ export class UpdateUserUseCase {
     private readonly userRepository: IUserRepository
   ) {}
 
-  async execute(id: string, updates: Partial<User>): Promise<User> {
+  async execute(id: string, updates: Partial<User>): Promise<UserDto> {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException(`Invalid ID format: ${id}`);
     }

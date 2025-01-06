@@ -1,23 +1,22 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
 import { JwtStrategy } from '@lesechos/common/strategies/jwt.strategy';
 import { environment } from '@lesechos/config/environment';
-import { AuthenticateUserUseCase } from '@lesechos/core/use-cases/authenticate-user.use-case';
-import { GetUserByIdUseCase } from '@lesechos/core/use-cases/get-user-by-id.use-case';
-import { LogoutUserUseCase } from '@lesechos/core/use-cases/logout.use-case';
-import { UserRepositoryAdapter } from '@lesechos/infrastructure/database/repositories/user-repository.adapter';
-import { UserSchema } from '@lesechos/infrastructure/database/schemas/user.schema';
 import { AuthBlacklistService } from '@lesechos/modules/auth/auth-blacklist.service';
 import { AuthController } from '@lesechos/modules/auth/auth.controller';
+import { DatabaseModule } from '@lesechos/modules/users/database/database.module';
+import { UserRepositoryAdapter } from '@lesechos/modules/users/database/repositories/user-repository.adapter';
+import { GetUserByIdUseCase } from '@lesechos/modules/users/use-cases/get-user-by-id.use-case';
+import { LogoutUserUseCase } from '@lesechos/modules/users/use-cases/logout.use-case';
 import { UsersModule } from '@lesechos/modules/users/users.module';
+import { AuthenticateUserUseCase } from 'authenticate-user.use-case';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
+    DatabaseModule,
     UsersModule,
     PassportModule,
     JwtModule.registerAsync({

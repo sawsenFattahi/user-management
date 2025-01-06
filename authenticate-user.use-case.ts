@@ -2,7 +2,9 @@ import { Inject, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from 'jsonwebtoken';
 
-import { IUserRepository } from '../interfaces/user-repository.interface';
+import { validatePassword } from '@lesechos/common/utils/validate-password';
+
+import { IUserRepository } from './src/modules/users/interfaces/user-repository.interface';
 
 export class AuthenticateUserUseCase {
   constructor(
@@ -12,8 +14,8 @@ export class AuthenticateUserUseCase {
   ) {}
 
   async execute(input: { username: string; password: string }): Promise<{ access_token: string }> {
-    const user = await this.userRepository.findByUsername(input.username);
-    if (!user || !(await user.validatePassword(input.password))) {
+    const user = await this.userRepository.findByUsername(input.username, true);
+    if (!user || !(await validatePassword(input.password, user.password))) {
       throw new UnauthorizedException('Invalid username or password');
     }
     const payload: JwtPayload = {
