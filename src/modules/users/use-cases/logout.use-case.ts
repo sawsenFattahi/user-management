@@ -1,8 +1,7 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { AuthBlacklistService } from '@lesechos/modules/auth/auth-blacklist.service';
-
-import { IUserRepository } from '../interfaces/user-repository.interface';
+import { IUserRepository } from '@lesechos/modules/users/interfaces/user-repository.interface';
 
 @Injectable()
 export class LogoutUserUseCase {

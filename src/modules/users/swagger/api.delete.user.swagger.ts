@@ -7,7 +7,11 @@ export const ApiDeleteUserResponse = () =>
       status: 200,
       description: 'The user has been successfully deleted.',
       schema: {
-        example: { message: 'User deleted successfully.' },
+        example: {
+          username: 'john_doe',
+          name: 'John Doe',
+          role: 'ADMIN',
+        },
       },
     })
   );

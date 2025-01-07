@@ -1,18 +1,17 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { Role } from '@lesechos/common/enums/role.enum';
+import { UserDocument } from '@lesechos/modules/users/database/schemas/user.schema';
+import { UserDto } from '@lesechos/modules/users/dto/user.dto';
 import { User } from '@lesechos/modules/users/entities/user.entity';
-
-import { UserDto } from '../../dto/user.dto';
-import { IUserRepository } from '../../interfaces/user-repository.interface';
-import { UserDocument } from '../schemas/user.schema';
+import { IUserRepository } from '@lesechos/modules/users/interfaces/user-repository.interface';
 
 @Injectable()
 export class UserRepositoryAdapter implements IUserRepository {
   constructor(@InjectModel('User') private readonly userModel: Model<UserDocument>) {}
-
+  private readonly logger = new Logger(UserRepositoryAdapter.name);
   /**
    * Create a new user in the database.
    * Throws BadRequestException if there is an error creating the user.
@@ -22,12 +21,15 @@ export class UserRepositoryAdapter implements IUserRepository {
       const userDocument = new this.userModel(user);
       const savedUser = await userDocument.save();
 
+      this.logger.log(`User created with ID: ${savedUser.id}`);
+
       return {
         id: savedUser.id,
         username: savedUser.username,
         role: savedUser.role as unknown as Role,
       };
     } catch (error) {
+      this.logger.error(`Error checking data: ${error.message}`);
       throw new BadRequestException(`Error checking data: ${error.message}`);
     }
   }
@@ -43,12 +45,15 @@ export class UserRepositoryAdapter implements IUserRepository {
         .findByIdAndUpdate(id, updates, { new: true, runValidators: true })
         .exec();
 
+      this.logger.log(`User updated with ID: ${updatedUser.id}`);
+
       return {
         id: updatedUser.id,
         username: updatedUser.username,
         role: updatedUser.role as unknown as Role,
       };
     } catch (error) {
+      this.logger.error(`Error updating user: ${error.message}`);
       throw new BadRequestException(`Error updating user: ${error.message}`);
     }
   }
@@ -65,6 +70,8 @@ export class UserRepositoryAdapter implements IUserRepository {
     try {
       const user = await this.userModel.findById(id).exec();
 
+      this.logger.log(`Found user with ID: ${user.id}`);
+
       const userById: UserDto = user
         ? {
             id: user.id,
@@ -78,6 +85,7 @@ export class UserRepositoryAdapter implements IUserRepository {
 
       return userById;
     } catch (error) {
+      this.logger.error(`Error finding user: ${error.message}`);
       throw new BadRequestException(`Error finding user: ${error.message}`);
     }
   }
@@ -88,6 +96,8 @@ export class UserRepositoryAdapter implements IUserRepository {
   async findByUsername(username: string, withPassword = false): Promise<UserDto | null> {
     try {
       const user = await this.userModel.findOne({ username }).exec();
+
+      this.logger.log(`Found user with username: ${username}`);
 
       const userByName: UserDto = user
         ? {
@@ -102,6 +112,7 @@ export class UserRepositoryAdapter implements IUserRepository {
 
       return userByName;
     } catch (error) {
+      this.logger.error(`Error finding user: ${error.message}`);
       throw new BadRequestException(`Error finding user: ${error.message}`);
     }
   }
@@ -122,6 +133,7 @@ export class UserRepositoryAdapter implements IUserRepository {
         .sort(sort)
         .skip(skip) // Skip documents for pagination
         .limit(limit); // Limit the number of documents returned.exec();
+      this.logger.log(`Found ${users.length} users`);
 
       return users.map((user) => ({
         id: user.id,
@@ -129,6 +141,7 @@ export class UserRepositoryAdapter implements IUserRepository {
         role: user.role as unknown as Role,
       }));
     } catch (error) {
+      this.logger.error(`Error finding users: ${error.message}`);
       throw new BadRequestException(`Error finding users: ${error.message}`);
     }
   }
@@ -144,10 +157,14 @@ export class UserRepositoryAdapter implements IUserRepository {
     }
     try {
       const deletedUser = await this.userModel.findByIdAndDelete(id).exec();
+      this.logger.log(`User deleted with ID: ${deletedUser.id}`);
 
       if (!deletedUser) {
+        this.logger.error(`User with ID ${id} not found`);
         throw new NotFoundException(`User with ID ${id} not found.`);
       }
+
+      this.logger.log(`User deleted with ID: ${deletedUser.id}`);
 
       return {
         id: deletedUser.id,
@@ -155,6 +172,7 @@ export class UserRepositoryAdapter implements IUserRepository {
         role: deletedUser.role as unknown as Role,
       };
     } catch (error) {
+      this.logger.error(`Error finding user: ${error.message}`);
       throw new BadRequestException(`Error finding user: ${error.message}`);
     }
   }

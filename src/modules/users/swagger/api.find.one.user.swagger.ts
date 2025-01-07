@@ -8,12 +8,9 @@ export const ApiGetOneUserResponse = () =>
       description: 'Details of the user with the given UID.',
       schema: {
         example: {
-          uid: '456',
-          username: 'jane_doe',
+          id: '456',
           name: 'Jane Doe',
-          role: 'admin',
-          address: { city: 'Los Angeles', zip: '90001' },
-          comment: 'An admin user',
+          role: 'ADMIN',
         },
       },
     })

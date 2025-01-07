@@ -8,12 +8,9 @@ export const ApiGetMeResponse = () =>
       description: 'Details of the current user.',
       schema: {
         example: {
-          uid: '123',
+          id: '123',
           username: 'john_doe',
-          name: 'John Doe',
-          role: 'user',
-          address: { city: 'New York', zip: '10001' },
-          comment: 'A test user',
+          role: 'USER',
         },
       },
     })

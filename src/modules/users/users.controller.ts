@@ -90,7 +90,7 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a user by UID' })
   @ApiGetOneUserResponse()
-  @Get('admin/:id')
+  @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.getUserByIdUseCase.execute(id);
   }
@@ -107,7 +107,7 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a list of all users' })
   @ApiFindAllUsersResponse()
-  @Get('admin')
+  @Get('')
   async findAll(@Query('filters') filters: string, @Query('sort') sort: string) {
     return this.getAllUsersUseCase.execute({ filters, sort });
   }
@@ -125,7 +125,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Update a user by UID (Admin only)' })
   @ApiUpdateUserBody()
   @ApiUpdateUserResponse()
-  @Patch('admin/:id')
+  @Patch(':id')
   async updateUserByAdmin(@Param('id') id: string, @Body() updates: UpdateUserDto) {
     return this.updateUserUseCase.execute(id, updates);
   }
@@ -141,7 +141,7 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a user by ID (Admin only)' })
   @ApiDeleteUserResponse()
-  @Delete('admin/:id')
+  @Delete(':id')
   async deleteUser(@Param('id') id: string) {
     return this.deleteUserUseCase.execute(id);
   }

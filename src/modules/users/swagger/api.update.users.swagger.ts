@@ -14,7 +14,7 @@ export const ApiUpdateUserBody = () =>
           name: 'Updated Name',
           address: { city: 'Los Angeles', zip: '90001' },
           comment: 'Updated admin comment',
-          role: 'user',
+          role: 'ADMIN',
         },
       },
     },
@@ -30,12 +30,9 @@ export const ApiUpdateUserResponse = () =>
       description: 'The user has been successfully updated.',
       schema: {
         example: {
-          uid: '456',
-          username: 'jane_doe',
+          id: '456',
           name: 'Updated Name',
-          role: 'user',
-          address: { city: 'Los Angeles', zip: '90001' },
-          comment: 'Updated admin comment',
+          role: 'ADMIN',
         },
       },
     }),

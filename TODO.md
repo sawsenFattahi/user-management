@@ -1,9 +1,6 @@
 # TODO File
 This file lists tasks, features, and improvements to work on for the project.
 
-# TODO File
-This file lists pending tasks and improvements for the project.
-
 ## General Tasks
 - [ ] Add DTO filter for findAll.
 - [ ] Add logging.
@@ -12,6 +9,9 @@ This file lists pending tasks and improvements for the project.
 - [ ] Replace mocks by databse test.
 - [ ] Improve error handling with meaningful messages and status codes.
 - [ ] Refactor repetitive code in controllers.
+- [ ] Add api version to Api endpoints.
+- [ ] Add Errors Api response to swagger docs.
+
 
 ## Features
 - [ ] Implement user registration with email verification.

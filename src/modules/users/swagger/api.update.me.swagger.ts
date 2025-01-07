@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 
-import { UpdateUserDto } from '../dto/update-user.dto';
+import { UpdateUserDto } from '@lesechos/modules/users/dto/update-user.dto';
 
 export const ApiUpdteMeBody = () =>
   applyDecorators(
@@ -29,10 +29,7 @@ export const ApiUpdateMeResponse = () =>
         example: {
           uid: '123',
           username: 'john_doe',
-          name: 'Updated Name',
           role: 'user',
-          address: { city: 'San Francisco', zip: '94105' },
-          comment: 'Updated comment',
         },
       },
     })

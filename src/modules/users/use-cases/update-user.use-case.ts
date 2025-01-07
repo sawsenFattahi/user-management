@@ -4,8 +4,7 @@ import { Types } from 'mongoose';
 import { ROLE } from '@lesechos/common/enums/role.enum';
 import { UserDto } from '@lesechos/modules/users/dto/user.dto';
 import { User } from '@lesechos/modules/users/entities/user.entity';
-
-import { IUserRepository } from '../interfaces/user-repository.interface';
+import { IUserRepository } from '@lesechos/modules/users/interfaces/user-repository.interface';
 
 export class UpdateUserUseCase {
   constructor(
