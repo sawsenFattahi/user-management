@@ -3,8 +3,8 @@ import { BadRequestException, Inject } from '@nestjs/common';
 import { Role } from '@lesechos/common/enums/role.enum';
 import { hashPassword } from '@lesechos/common/utils/hash-password';
 import { mapToRole } from '@lesechos/common/utils/map-to-role';
+import { User } from '@lesechos/modules/users/database/mongo/entities/user.entity';
 import { UserDto } from '@lesechos/modules/users/dto/user.dto';
-import { User } from '@lesechos/modules/users/database/entities/user.entity';
 import { IUserRepository } from '@lesechos/modules/users/interfaces/user-repository.interface';
 
 export class RegisterUserUseCase {

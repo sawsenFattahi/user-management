@@ -1,5 +1,5 @@
 import type { UserDto } from '@lesechos/modules/users/dto/user.dto';
-import type { User } from '@lesechos/modules/users/database/entities/user.entity';
+import type { User } from '@lesechos/modules/users/database/mongo/entities/user.entity';
 
 export interface IUserRepository {
   create(user: User): Promise<UserDto>;
