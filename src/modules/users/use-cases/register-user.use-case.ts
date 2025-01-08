@@ -27,7 +27,6 @@ export class RegisterUserUseCase {
       role: input.role ? mapToRole(input.role as unknown as Role) : undefined, // Valider ou mapper le rôle
     };
     const user = new User(
-      Date.now().toString(),
       input.username,
       input.password,
       updateUser.role,

@@ -1,34 +1,32 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument } from 'mongoose';
 
 import type { Role } from '@lesechos/common/enums/role.enum';
 
-@Entity()
+@Schema({ timestamps: true })
 export class User {
-  @PrimaryGeneratedColumn()
-  id: string;
-
-  @Column()
+  @Prop({ required: true })
   username: string;
 
-  @Column()
+  @Prop({ required: true })
   password: string;
 
-  @Column()
+  @Prop({ required: true })
   role: Role;
 
-  @Column()
+  @Prop()
   email?: string;
 
-  @Column()
+  @Prop()
   name?: string;
 
-  @Column()
+  @Prop({ type: Object })
   address?: Record<string, any>;
 
-  @Column()
+  @Prop()
   comment?: string;
+
   constructor(
-    id: string,
     username: string,
     password: string,
     role: Role,
@@ -37,7 +35,6 @@ export class User {
     address?: Record<string, any>,
     comment?: string
   ) {
-    this.id = id;
     this.username = username;
     this.password = password;
     this.role = role;
@@ -47,3 +44,7 @@ export class User {
     this.comment = comment;
   }
 }
+
+export type UserDocument = HydratedDocument<User>;
+
+export const UserSchema = SchemaFactory.createForClass(User);
