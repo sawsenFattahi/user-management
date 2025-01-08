@@ -3,7 +3,7 @@ import { IsEmail, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from 'cla
 import { ROLE, Role } from '@lesechos/common/enums/role.enum';
 
 /**
- * DTO for creating a user
+ * DTO  user
  */
 export class UserDto {
   @IsString()
