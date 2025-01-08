@@ -12,7 +12,7 @@ import { UserRepositoryAdapter } from '@lesechos/modules/users/database/reposito
 
 import { UsersController } from './users.controller';
 
-import type { User } from '@lesechos/modules/users/entities/user.entity';
+import type { User } from '@lesechos/modules/users/database/entities/user.entity';
 import type { INestApplication } from '@nestjs/common';
 import type { TestingModule } from '@nestjs/testing';
 

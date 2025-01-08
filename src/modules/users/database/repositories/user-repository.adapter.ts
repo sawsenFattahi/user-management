@@ -3,9 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { Role } from '@lesechos/common/enums/role.enum';
-import { UserDocument } from '@lesechos/modules/users/database/schemas/user.schema';
 import { UserDto } from '@lesechos/modules/users/dto/user.dto';
-import { User } from '@lesechos/modules/users/entities/user.entity';
+import { User, UserDocument } from '@lesechos/modules/users/database/entities/user.entity';
 import { IUserRepository } from '@lesechos/modules/users/interfaces/user-repository.interface';
 
 @Injectable()
