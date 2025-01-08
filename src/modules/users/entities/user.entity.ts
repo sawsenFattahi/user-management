@@ -1,5 +1,7 @@
 import type { Role } from '@lesechos/common/enums/role.enum';
+import { Entity } from 'typeorm';
 
+@Entity()
 export class User {
   constructor(
     public id: string,
