@@ -3,16 +3,16 @@ import * as request from 'supertest';
 
 import { JwtAuthGuard } from '@lesechos/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@lesechos/common/guards/roles.guard';
+import { UserRepositoryAdapter } from '@lesechos/modules/users/database/repositories/user-repository.adapter';
 import { DeleteUserUseCase } from '@lesechos/modules/users/use-cases/delete-user.use-case';
 import { GetAllUsersUseCase } from '@lesechos/modules/users/use-cases/get-all-users.use-case';
 import { GetUserByIdUseCase } from '@lesechos/modules/users/use-cases/get-user-by-id.use-case';
 import { RegisterUserUseCase } from '@lesechos/modules/users/use-cases/register-user.use-case';
 import { UpdateUserUseCase } from '@lesechos/modules/users/use-cases/update-user.use-case';
-import { UserRepositoryAdapter } from '@lesechos/modules/users/database/repositories/user-repository.adapter';
 
 import { UsersController } from './users.controller';
 
-import type { User } from '@lesechos/modules/users/database/mongo/entities/user.entity';
+import type { Role } from '@lesechos/common/enums/role.enum';
 import type { INestApplication } from '@nestjs/common';
 import type { TestingModule } from '@nestjs/testing';
 
@@ -98,7 +98,7 @@ describe('UsersController', () => {
     const user = createMockUser({ id: userId });
     jest.spyOn(mockGetUserByIdUseCase, 'execute').mockResolvedValue(user);
 
-    const response = await request(app.getHttpServer()).get(`/users/admin/${userId}`).expect(200);
+    const response = await request(app.getHttpServer()).get(`/users/${userId}`).expect(200);
 
     expect(response.body).toEqual({
       id: '123',
@@ -116,7 +116,7 @@ describe('UsersController', () => {
     ];
     jest.spyOn(mockGetAllUsersUseCase, 'execute').mockResolvedValue(users);
 
-    const response = await request(app.getHttpServer()).get('/users/admin').expect(200);
+    const response = await request(app.getHttpServer()).get('/users').expect(200);
 
     expect(response.body).toEqual([
       { id: '1', password: 'hashedPassword123', role: 'user', username: 'user1' },
@@ -128,11 +128,11 @@ describe('UsersController', () => {
   it('should update a user by ID', async () => {
     const userId = '123';
     const updateDto = { username: 'updateduser' };
-    const updatedUser = { id: userId, ...updateDto };
-    jest.spyOn(mockUpdateUserUseCase, 'execute').mockResolvedValue(updatedUser as User);
+    const updatedUser = { id: userId, role: 'USER' as Role, ...updateDto };
+    jest.spyOn(mockUpdateUserUseCase, 'execute').mockResolvedValue(updatedUser);
 
     const response = await request(app.getHttpServer())
-      .patch(`/users/admin/${userId}`)
+      .patch(`/users/${userId}`)
       .send(updateDto)
       .expect(200);
 
@@ -145,9 +145,7 @@ describe('UsersController', () => {
     const user = createMockUser({ id: userId });
     jest.spyOn(mockDeleteUserUseCase, 'execute').mockResolvedValue(user);
 
-    const response = await request(app.getHttpServer())
-      .delete(`/users/admin/${userId}`)
-      .expect(200);
+    const response = await request(app.getHttpServer()).delete(`/users/${userId}`).expect(200);
 
     expect(response.body).toEqual({
       id: '123',
