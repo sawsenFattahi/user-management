@@ -1,16 +1,17 @@
-import { BadRequestException, Inject, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Types } from 'mongoose';
 
 import { ROLE } from '@lesechos/common/enums/role.enum';
-import { UserDto } from '@lesechos/modules/users/dto/user.dto';
 import { User } from '@lesechos/modules/users/database/mongo/entities/user.entity';
-import { IUserRepository } from '@lesechos/modules/users/interfaces/user-repository.interface';
+import { UserDto } from '@lesechos/modules/users/dto/user.dto';
+import {
+  IUserRepository,
+  USER_REPOSITORY_TOKEN,
+} from '@lesechos/modules/users/interfaces/user-repository.interface';
 
+@Injectable()
 export class UpdateUserUseCase {
-  constructor(
-    @Inject('IUserRepository')
-    private readonly userRepository: IUserRepository
-  ) {}
+  constructor(@Inject(USER_REPOSITORY_TOKEN) private readonly userRepository: IUserRepository) {}
 
   async execute(id: string, updates: Partial<User>): Promise<UserDto> {
     if (!Types.ObjectId.isValid(id)) {

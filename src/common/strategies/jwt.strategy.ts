@@ -1,18 +1,21 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { environment } from '@lesechos/config/environment';
 import { AuthBlacklistService } from '@lesechos/modules/auth/auth-blacklist.service';
-import { UserRepositoryAdapter } from '@lesechos/modules/users/database/repositories/user-repository.adapter';
+import {
+  IUserRepository,
+  USER_REPOSITORY_TOKEN,
+} from '@lesechos/modules/users/interfaces/user-repository.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private readonly blacklistService: AuthBlacklistService,
     readonly configService: ConfigService,
-    private readonly userRepository: UserRepositoryAdapter
+    @Inject(USER_REPOSITORY_TOKEN) private readonly userRepository: IUserRepository // Inject the token
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

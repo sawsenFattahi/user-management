@@ -1,15 +1,10 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { AuthBlacklistService } from '@lesechos/modules/auth/auth-blacklist.service';
-import { IUserRepository } from '@lesechos/modules/users/interfaces/user-repository.interface';
 
 @Injectable()
 export class LogoutUserUseCase {
-  constructor(
-    @Inject('IUserRepository')
-    private readonly userRepository: IUserRepository,
-    private readonly blacklistService: AuthBlacklistService
-  ) {}
+  constructor(private readonly blacklistService: AuthBlacklistService) {}
 
   async execute(authHeader: string) {
     if (!authHeader) {

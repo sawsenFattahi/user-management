@@ -1,12 +1,13 @@
-import { Inject, InternalServerErrorException } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 
-import { IUserRepository } from '@lesechos/modules/users/interfaces/user-repository.interface';
+import {
+  IUserRepository,
+  USER_REPOSITORY_TOKEN,
+} from '@lesechos/modules/users/interfaces/user-repository.interface';
 
+@Injectable()
 export class GetAllUsersUseCase {
-  constructor(
-    @Inject('IUserRepository')
-    private readonly userRepository: IUserRepository
-  ) {}
+  constructor(@Inject(USER_REPOSITORY_TOKEN) private readonly userRepository: IUserRepository) {}
 
   async execute(query: { filters?: string; sort?: string; page?: number; limit?: number }) {
     // Parse filters from string to object

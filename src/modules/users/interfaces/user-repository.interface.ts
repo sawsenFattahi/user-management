@@ -1,5 +1,7 @@
-import type { UserDto } from '@lesechos/modules/users/dto/user.dto';
 import type { User } from '@lesechos/modules/users/database/mongo/entities/user.entity';
+import type { UserDto } from '@lesechos/modules/users/dto/user.dto';
+
+export const USER_REPOSITORY_TOKEN = Symbol('IUserRepository');
 
 export interface IUserRepository {
   create(user: User): Promise<UserDto>;

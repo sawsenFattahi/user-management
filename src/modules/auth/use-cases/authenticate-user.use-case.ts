@@ -1,14 +1,17 @@
-import { Inject, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from 'jsonwebtoken';
 
 import { validatePassword } from '@lesechos/common/utils/validate-password';
-import { IUserRepository } from '@lesechos/modules/users/interfaces/user-repository.interface';
+import {
+  IUserRepository,
+  USER_REPOSITORY_TOKEN,
+} from '@lesechos/modules/users/interfaces/user-repository.interface';
 
+@Injectable()
 export class AuthenticateUserUseCase {
   constructor(
-    @Inject('IUserRepository')
-    private readonly userRepository: IUserRepository,
+    @Inject(USER_REPOSITORY_TOKEN) private readonly userRepository: IUserRepository,
     private readonly jwtService: JwtService
   ) {}
 
