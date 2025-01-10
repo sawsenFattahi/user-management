@@ -1,8 +1,6 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { Role } from '@lesechos/common/enums/role.enum';
 import { hashPassword } from '@lesechos/common/utils/hash-password';
-import { mapToRole } from '@lesechos/common/utils/map-to-role';
 import { User } from '@lesechos/modules/users/database/mongo/entities/user.entity';
 import { UserDto } from '@lesechos/modules/users/dto/user.dto';
 import {
@@ -10,27 +8,17 @@ import {
   USER_REPOSITORY_TOKEN,
 } from '@lesechos/modules/users/interfaces/user-repository.interface';
 
+import { CreateUserDto } from '../dto/create-user.dto';
+
 @Injectable()
 export class RegisterUserUseCase {
   constructor(@Inject(USER_REPOSITORY_TOKEN) private readonly userRepository: IUserRepository) {}
 
-  async execute(input: {
-    username: string;
-    email?: string;
-    password: string;
-    role: Role;
-    name?: string;
-    address?: Record<string, any>;
-    comment?: string;
-  }): Promise<UserDto> {
-    const updateUser: Partial<User> = {
-      ...input,
-      role: input.role ? mapToRole(input.role as unknown as Role) : undefined, // Valider ou mapper le rôle
-    };
+  async execute(input: CreateUserDto): Promise<UserDto> {
     const user = new User(
       input.username,
       input.password,
-      updateUser.role,
+      input.role,
       input.email,
       input.name,
       input.address,

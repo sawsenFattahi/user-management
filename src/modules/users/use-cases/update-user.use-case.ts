@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 import { Types } from 'mongoose';
 
 import { ROLE } from '@lesechos/common/enums/role.enum';
-import { User } from '@lesechos/modules/users/database/mongo/entities/user.entity';
+import { UpdateUserDto } from '@lesechos/modules/users/dto/update-user.dto';
 import { UserDto } from '@lesechos/modules/users/dto/user.dto';
 import {
   IUserRepository,
@@ -13,7 +13,7 @@ import {
 export class UpdateUserUseCase {
   constructor(@Inject(USER_REPOSITORY_TOKEN) private readonly userRepository: IUserRepository) {}
 
-  async execute(id: string, updates: Partial<User>): Promise<UserDto> {
+  async execute(id: string, updates: UpdateUserDto): Promise<UserDto> {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException(`Invalid ID format: ${id}`);
     }
