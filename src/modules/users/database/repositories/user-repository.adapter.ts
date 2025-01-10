@@ -56,7 +56,7 @@ export class UserRepositoryAdapter implements IUserRepository {
       };
     } catch (error) {
       this.logger.error(`Error updating user: ${error.message}`);
-      throw new BadRequestException(`Error updating user: ${error.message}`);
+      throw new NotFoundException(`Error updating user: ${error.message}`);
     }
   }
 
