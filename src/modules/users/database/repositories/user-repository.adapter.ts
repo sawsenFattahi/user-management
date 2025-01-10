@@ -39,6 +39,9 @@ export class UserRepositoryAdapter implements IUserRepository {
    * Throws BadRequestException if there is an error updating the user.
    */
   async update(id: string, updates: Partial<User>): Promise<UserDto> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(`Invalid ID format: ${id}`);
+    }
     try {
       const updatedUser = await this.userModel
         .findByIdAndUpdate(id, updates, { new: true, runValidators: true })

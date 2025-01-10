@@ -1,5 +1,4 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { Types } from 'mongoose';
 
 import { ROLE } from '@lesechos/common/enums/role.enum';
 import { UpdateUserDto } from '@lesechos/modules/users/dto/update-user.dto';
@@ -14,9 +13,6 @@ export class UpdateUserUseCase {
   constructor(@Inject(USER_REPOSITORY_TOKEN) private readonly userRepository: IUserRepository) {}
 
   async execute(id: string, updates: UpdateUserDto): Promise<UserDto> {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new NotFoundException(`Invalid ID format: ${id}`);
-    }
     // Validate restricted fields
     if ('username' in updates) {
       throw new BadRequestException('Updating the username is not allowed.');
