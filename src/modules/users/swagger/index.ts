@@ -1,6 +1,6 @@
 import { ApiCreateUserBody, ApiCreateUserResponse } from './api.create.users.swagger';
 import { ApiDeleteUserResponse } from './api.delete.user.swagger';
-import { ApiFindAllUsersResponse } from './api.find.all.users.swagger';
+import { ApiFindAllUsersQuery, ApiFindAllUsersResponse } from './api.find.all.users.swagger';
 import { ApiGetOneUserResponse } from './api.find.one.user.swagger';
 import { ApiGetMeResponse } from './api.get.me.swagger';
 import { ApiUpdateMeResponse, ApiUpdteMeBody } from './api.update.me.swagger';
@@ -17,4 +17,5 @@ export {
   ApiFindAllUsersResponse,
   ApiCreateUserBody,
   ApiCreateUserResponse,
+  ApiFindAllUsersQuery,
 };

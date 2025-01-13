@@ -30,6 +30,7 @@ import {
   ApiCreateUserBody,
   ApiCreateUserResponse,
   ApiDeleteUserResponse,
+  ApiFindAllUsersQuery,
   ApiFindAllUsersResponse,
   ApiGetOneUserResponse,
   ApiUpdateUserBody,
@@ -106,6 +107,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a list of all users' })
+  @ApiFindAllUsersQuery()
   @ApiFindAllUsersResponse()
   @Get('')
   async findAll(@Query('filters') filters: string, @Query('sort') sort: string) {

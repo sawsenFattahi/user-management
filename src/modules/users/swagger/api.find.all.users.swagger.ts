@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 /**
  * Decorator for API responses for finding all users
@@ -24,5 +24,21 @@ export const ApiFindAllUsersResponse = () =>
           },
         ],
       },
+    })
+  );
+
+export const ApiFindAllUsersQuery = () =>
+  applyDecorators(
+    ApiQuery({
+      name: 'filters',
+      required: false,
+      description: 'Filters to apply to the user list (JSON string)',
+      example: '{"role":"ADMIN"}',
+    }),
+    ApiQuery({
+      name: 'sort',
+      required: false,
+      description: 'Sorting criteria (JSON string)',
+      example: '{"name":"desc"}',
     })
   );
