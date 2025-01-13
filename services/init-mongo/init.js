@@ -1,4 +1,4 @@
-db = db.getSiblingDB('lesechos');
+db = db.getSiblingDB('lesechos'); // Switch to the lesechos database
 
 db.createUser({
   user: 'lesechos',
@@ -6,7 +6,7 @@ db.createUser({
   roles: [
     {
       role: 'readWrite',
-      db: 'lesechos',
+      db: 'lesechos', // The database to which the user is assigned
     },
   ],
 });

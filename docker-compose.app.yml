@@ -1,0 +1,19 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: les-echos-api
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - MONGODB_URI=mongodb://lesechos:lesechos-password@mongodb:27017/lesechos
+      - JWT_SECRET=AZER-1234-TYUI-5678-OPQS
+      - PORT=8080
+    networks:
+      - les-echos-network
+
+networks:
+  les-echos-network:
+    external: true

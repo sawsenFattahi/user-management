@@ -63,10 +63,11 @@ $ npm run test:cov
 ```
 
 ## Use Docker Compose
-docker-compose up -d
+docker network create les-echos-network  
+docker-compose -f docker-compose.app.yml -f services/docker-compose.mongo.yml  up --build
 
 ### Access the Application
-The application will typically be available at http://localhost:3000. Verify the port in your docker-compose.yml
+The application will typically be available at http://localhost:8080. Verify the port in your docker-compose.yml
 
 ## API Documentation Explore endpoints using Open API
 The Open API will typically be available at http://localhost:3000/api. Verify the port in your docker-compose.yml or .env
