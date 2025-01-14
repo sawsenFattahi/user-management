@@ -1,11 +1,9 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { Public } from '@lesechos/common/decorators/public.decorator';
 import { Roles } from '@lesechos/common/decorators/roles.decorator';
 import { ROLE } from '@lesechos/common/enums/role.enum';
-import { JwtAuthGuard } from '@lesechos/common/guards/jwt-auth.guard';
-import { RolesGuard } from '@lesechos/common/guards/roles.guard';
 import { AuthenticateUserUseCase } from '@lesechos/modules/auth/use-cases/authenticate-user.use-case';
 import { ApiGetMeResponse } from '@lesechos/modules/users/swagger/api.get.me.swagger';
 import { GetUserByIdUseCase } from '@lesechos/modules/users/use-cases/get-user-by-id.use-case';
@@ -48,7 +46,6 @@ export class AuthController {
    * @returns User details
    */
   @Roles(ROLE.USER, ROLE.ADMIN)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current USER information' })
   @ApiGetMeResponse()
@@ -63,7 +60,6 @@ export class AuthController {
    * @returns Logout confirmation message
    */
   @Roles(ROLE.USER, ROLE.ADMIN)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('logout')
   @ApiOperation({ summary: 'User logout' })
   @ApiBearerAuth()

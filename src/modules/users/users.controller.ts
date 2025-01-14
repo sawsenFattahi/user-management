@@ -1,22 +1,9 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { Public } from '@lesechos/common/decorators/public.decorator';
 import { Roles } from '@lesechos/common/decorators/roles.decorator';
 import { ROLE } from '@lesechos/common/enums/role.enum';
-import { JwtAuthGuard } from '@lesechos/common/guards/jwt-auth.guard';
-import { RolesGuard } from '@lesechos/common/guards/roles.guard';
 import { CreateUserDto } from '@lesechos/modules/users/dto/create-user.dto';
 import { UpdateUserDto } from '@lesechos/modules/users/dto/update-user.dto';
 import { UserDto } from '@lesechos/modules/users/dto/user.dto';
@@ -70,7 +57,6 @@ export class UsersController {
    * @returns The updated user object
    */
   @Roles(ROLE.USER, ROLE.ADMIN)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update current user information' })
   @ApiUpdateUserBody()
@@ -90,7 +76,6 @@ export class UsersController {
    * @returns The user object
    */
   @Roles(ROLE.ADMIN)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a user by UID' })
   @ApiGetOneUserResponse()
@@ -107,7 +92,6 @@ export class UsersController {
    * @returns List of users
    */
   @Roles(ROLE.ADMIN)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a list of all users' })
   @ApiFindAllUsersQuery()
@@ -128,7 +112,6 @@ export class UsersController {
    * @returns The updated user object
    */
   @Roles(ROLE.ADMIN)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a user by UID (Admin only)' })
   @ApiUpdateUserBody()
@@ -148,7 +131,6 @@ export class UsersController {
    * @returns A confirmation message
    */
   @Roles(ROLE.ADMIN)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a user by ID (Admin only)' })
   @ApiDeleteUserResponse()
