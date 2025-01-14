@@ -3,9 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { Role } from '@lesechos/common/enums/role.enum';
-import { User, UserDocument } from '@lesechos/modules/users/database/mongo/entities/user.entity';
+import { UserDocument } from '@lesechos/modules/users/database/mongo/entities/user.entity';
 import { UserDto } from '@lesechos/modules/users/dto/user.dto';
 import { IUserRepository } from '@lesechos/modules/users/interfaces/user-repository.interface';
+import { IUser } from '@lesechos/modules/users/interfaces/user.interface';
 
 @Injectable()
 export class UserRepositoryAdapter implements IUserRepository {
@@ -15,7 +16,7 @@ export class UserRepositoryAdapter implements IUserRepository {
    * Create a new user in the database.
    * Throws BadRequestException if there is an error creating the user.
    */
-  async create(user: User): Promise<UserDto> {
+  async create(user: IUser): Promise<Partial<IUser>> {
     try {
       const userDocument = new this.userModel(user);
       const savedUser = await userDocument.save();
@@ -38,7 +39,7 @@ export class UserRepositoryAdapter implements IUserRepository {
    * Throws NotFoundException if the user is not found.
    * Throws BadRequestException if there is an error updating the user.
    */
-  async update(id: string, updates: Partial<User>): Promise<UserDto> {
+  async update(id: string, updates: Partial<IUser>): Promise<Partial<IUser>> {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException(`Invalid ID format: ${id}`);
     }
@@ -65,7 +66,7 @@ export class UserRepositoryAdapter implements IUserRepository {
    * Throws NotFoundException if the user is not found.
    * Throws BadRequestException if there is an error finding the user.
    */
-  async findById(id: string, withPassword = false): Promise<UserDto | null> {
+  async findById(id: string, withPassword = false): Promise<Partial<IUser> | null> {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException(`Invalid ID format: ${id}`);
     }
@@ -74,7 +75,7 @@ export class UserRepositoryAdapter implements IUserRepository {
 
       this.logger.log(`Found user with ID: ${user.id}`);
 
-      const userById: UserDto = user
+      const userById: Partial<IUser> = user
         ? {
             id: user.id,
             username: user.username,
@@ -95,7 +96,7 @@ export class UserRepositoryAdapter implements IUserRepository {
   /**
    * Find a user by username.
    */
-  async findByUsername(username: string, withPassword = false): Promise<UserDto | null> {
+  async findByUsername(username: string, withPassword = false): Promise<Partial<IUser> | null> {
     try {
       const user = await this.userModel.findOne({ username }).exec();
 
@@ -123,11 +124,11 @@ export class UserRepositoryAdapter implements IUserRepository {
    * Find all users with optional filters and sorting.
    */
   async findAll(
-    filters: Partial<UserDto> = {},
+    filters: Partial<IUser> = {},
     sort: Record<string, 'asc' | 'desc' | 1 | -1> = {},
     page: number = 1,
     limit: number = 10
-  ): Promise<UserDto[]> {
+  ): Promise<Partial<IUser[]>> {
     try {
       const skip = (page - 1) * limit;
       const users = await this.userModel
@@ -153,7 +154,7 @@ export class UserRepositoryAdapter implements IUserRepository {
    * Throws NotFoundException if the user is not found.
    * Throws BadRequestException if there is an error deleting the user.
    */
-  async delete(id: string): Promise<UserDto> {
+  async delete(id: string): Promise<Partial<IUser>> {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException(`Invalid ID format: ${id}`);
     }

@@ -8,15 +8,15 @@ import { ROLE, Role } from '@lesechos/common/enums/role.enum';
 export class UserDto {
   @IsString()
   @IsNotEmpty()
-  id: string;
-
-  @IsString()
-  @IsNotEmpty()
   username: string;
 
   @IsString()
   @IsOptional()
   password?: string;
+
+  @IsString()
+  @IsOptional()
+  id?: string;
 
   @IsEmail()
   @IsOptional()

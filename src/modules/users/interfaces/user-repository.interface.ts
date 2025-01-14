@@ -1,18 +1,17 @@
-import type { User } from '@lesechos/modules/users/database/mongo/entities/user.entity';
-import type { UserDto } from '@lesechos/modules/users/dto/user.dto';
+import type { IUser } from '@lesechos/modules/users/interfaces/user.interface';
 
 export const USER_REPOSITORY_TOKEN = Symbol('IUserRepository');
 
 export interface IUserRepository {
-  create(user: User): Promise<UserDto>;
-  findById(id: string, withPassword?: boolean): Promise<UserDto | null>;
-  findByUsername(username: string, withPassword?: boolean): Promise<UserDto | null>;
+  create(user: IUser): Promise<Partial<IUser>>;
+  findById(id: string, withPassword?: boolean): Promise<Partial<IUser> | null>;
+  findByUsername(username: string, withPassword?: boolean): Promise<Partial<IUser> | null>;
   findAll(
-    filters: Partial<User>,
+    filters: Partial<IUser>,
     sort: Record<string, 'asc' | 'desc' | 1 | -1>,
     page: number,
     limit: number
-  ): Promise<UserDto[]>;
-  update(id: string, updates: Partial<User>): Promise<UserDto>;
-  delete(id: string): Promise<UserDto>;
+  ): Promise<Partial<IUser[]>>;
+  update(id: string, updates: Partial<IUser>): Promise<Partial<IUser>>;
+  delete(id: string): Promise<Partial<IUser>>;
 }

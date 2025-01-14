@@ -1,10 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
+import { IUser } from '@lesechos/modules/users/interfaces/user.interface';
+
 import type { Role } from '@lesechos/common/enums/role.enum';
 
 @Schema({ timestamps: true })
-export class User {
+export class User implements IUser {
   @Prop({ required: true })
   username: string;
 

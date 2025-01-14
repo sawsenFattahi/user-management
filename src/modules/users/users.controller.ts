@@ -58,7 +58,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Create a new user' })
   @ApiCreateUserBody()
   @ApiCreateUserResponse()
-  async create(@Body() createUserDto: CreateUserDto) {
+  async create(@Body() createUserDto: CreateUserDto): Promise<Partial<UserDto>> {
     return this.registerUserUseCase.execute(createUserDto);
   }
 
@@ -76,7 +76,10 @@ export class UsersController {
   @ApiUpdateUserBody()
   @ApiUpdateUserResponse()
   @Patch('me')
-  async updateCurrentUser(@Req() req: any, @Body() updates: UpdateUserDto): Promise<UserDto> {
+  async updateCurrentUser(
+    @Req() req: any,
+    @Body() updates: UpdateUserDto
+  ): Promise<Partial<UserDto>> {
     return this.updateUserUseCase.execute(req?.user?.id, updates);
   }
 
@@ -110,7 +113,10 @@ export class UsersController {
   @ApiFindAllUsersQuery()
   @ApiFindAllUsersResponse()
   @Get('')
-  async findAll(@Query('filters') filters: string, @Query('sort') sort: string) {
+  async findAll(
+    @Query('filters') filters: string,
+    @Query('sort') sort: string
+  ): Promise<Partial<UserDto[]>> {
     return this.getAllUsersUseCase.execute({ filters, sort });
   }
 
@@ -128,7 +134,10 @@ export class UsersController {
   @ApiUpdateUserBody()
   @ApiUpdateUserResponse()
   @Patch(':id')
-  async updateUserByAdmin(@Param('id') id: string, @Body() updates: UpdateUserDto) {
+  async updateUserByAdmin(
+    @Param('id') id: string,
+    @Body() updates: UpdateUserDto
+  ): Promise<Partial<UserDto>> {
     return this.updateUserUseCase.execute(id, updates);
   }
 
@@ -144,7 +153,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Delete a user by ID (Admin only)' })
   @ApiDeleteUserResponse()
   @Delete(':id')
-  async deleteUser(@Param('id') id: string) {
+  async deleteUser(@Param('id') id: string): Promise<Partial<UserDto>> {
     return this.deleteUserUseCase.execute(id);
   }
 }

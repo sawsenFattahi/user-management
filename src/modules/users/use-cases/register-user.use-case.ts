@@ -2,11 +2,11 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { hashPassword } from '@lesechos/common/utils/hash-password';
 import { User } from '@lesechos/modules/users/database/mongo/entities/user.entity';
-import { UserDto } from '@lesechos/modules/users/dto/user.dto';
 import {
   IUserRepository,
   USER_REPOSITORY_TOKEN,
 } from '@lesechos/modules/users/interfaces/user-repository.interface';
+import { IUser } from '@lesechos/modules/users/interfaces/user.interface';
 
 import { CreateUserDto } from '../dto/create-user.dto';
 
@@ -14,7 +14,7 @@ import { CreateUserDto } from '../dto/create-user.dto';
 export class RegisterUserUseCase {
   constructor(@Inject(USER_REPOSITORY_TOKEN) private readonly userRepository: IUserRepository) {}
 
-  async execute(input: CreateUserDto): Promise<UserDto> {
+  async execute(input: CreateUserDto): Promise<Partial<IUser>> {
     const user = new User(
       input.username,
       input.password,
